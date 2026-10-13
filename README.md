@@ -128,6 +128,26 @@ Akun seed (password `password123`):
 
 Variabel lingkungan ada di `.env.example`. Jangan commit `.env.local`.
 
+## Deploy ke Vercel + Supabase
+
+1. Di Supabase: Project Settings → Database → Connection string. Ambil dua URL:
+   - **Session pooler / direct (port 5432)** untuk `npm run db:setup` dari komputer sendiri.
+   - **Transaction pooler (port 6543)** untuk Vercel. Aplikasi otomatis mematikan prepared statement di port ini.
+2. Jalankan migrasi dan seed sekali dari komputer sendiri: `DATABASE_URL=<url port 5432> npm run db:setup`. Segera ganti password akun seed.
+3. Unggah gambar sekali dengan `SUPABASE_URL` dan `SUPABASE_SERVICE_ROLE_KEY` terisi: `node scripts/upload-images-to-supabase.mjs` (bucket `pos-images` dibuat otomatis).
+4. Di Vercel, set Environment Variables (Production):
+
+| Nama | Isi |
+| --- | --- |
+| `DATABASE_URL` | URL transaction pooler (port 6543) |
+| `SESSION_SECRET` | String acak minimal 32 karakter (`openssl rand -base64 48`) |
+| `IMAGE_DRIVER` | `supabase` |
+| `SUPABASE_URL` | `https://<ref>.supabase.co` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Service role key (rahasia, jangan diberi awalan `NEXT_PUBLIC_`) |
+| `SUPABASE_IMAGE_BUCKET` | `pos-images` (opsional) |
+
+5. Atur region Functions di Vercel sama dengan region database Supabase agar query cepat. Zona waktu WITA sudah tertulis di query, jadi `TZ` tidak perlu diset.
+
 ## Alur uji penjualan
 
 1. Login kasir, buka shift.

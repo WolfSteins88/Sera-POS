@@ -12,10 +12,19 @@ function databaseUrl() {
 
 const globalForSql = globalThis as unknown as { sql?: ReturnType<typeof postgres> };
 
+// Supabase's transaction pooler (port 6543) does not support prepared statements,
+// and each Vercel function instance should hold only a few connections.
+function usesTransactionPooler(url: string) {
+  return new URL(url).port === "6543";
+}
+
 export function getSql() {
   if (!globalForSql.sql) {
-    globalForSql.sql = postgres(databaseUrl(), {
-      max: 10,
+    const url = databaseUrl();
+    const pooled = usesTransactionPooler(url);
+    globalForSql.sql = postgres(url, {
+      max: pooled ? 3 : 10,
+      prepare: !pooled,
       idle_timeout: 20,
       connect_timeout: 10,
     });
