@@ -33,7 +33,7 @@ function stockText(value: number) {
 
 function day(iso: string | null) {
   if (!iso) return "-";
-  return new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Jakarta", day: "numeric", month: "short", year: "numeric" }).format(new Date(iso));
+  return new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Makassar", day: "numeric", month: "short", year: "numeric" }).format(new Date(iso));
 }
 
 export function InventoryEditor({ item, lastStockAt }: { item: Item | null; lastStockAt: string | null }) {

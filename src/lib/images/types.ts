@@ -8,13 +8,8 @@ export const IMAGE_MIME: Record<string, string> = {
   "image/webp": "webp",
 };
 
+/** Always the app's own route; it serves local files or redirects to Supabase Storage. */
 export function imageUrl(kind: ImageKind, filename: string | null | undefined) {
   if (!filename) return null;
-  const driver = process.env.NEXT_PUBLIC_IMAGE_DRIVER || "local";
-  if (driver === "supabase") {
-    const base = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    if (!base) return null;
-    return `${base.replace(/\/$/, "")}/storage/v1/object/public/pos-images/${kind}/${filename}`;
-  }
   return `/uploads/${kind}/${filename}`;
 }

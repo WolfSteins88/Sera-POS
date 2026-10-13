@@ -52,7 +52,7 @@ function href(query: Query, patch: Partial<Query>) {
 export function loginText(iso: string | null) {
   if (!iso) return "—";
   return new Intl.DateTimeFormat("id-ID", {
-    timeZone: "Asia/Jakarta",
+    timeZone: "Asia/Makassar",
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -282,11 +282,27 @@ function RowMenu({ id, name }: { id: string; name: string }) {
       <summary className="flex size-8 cursor-pointer list-none items-center justify-center rounded-full bg-white hover:bg-chip [&::-webkit-details-marker]:hidden" aria-label={`Aksi ${name}`}>
         <MoreHorizontal size={16} />
       </summary>
-      <div className="menu-pop absolute right-0 z-20 mt-1 w-40 rounded-xl border border-line bg-white p-1 shadow-card">
-        <form action={resetUserPassword}>
+      <div className="menu-pop absolute right-0 z-20 mt-1 w-60 rounded-xl border border-line bg-white p-2 shadow-card">
+        <form
+          action={resetUserPassword}
+          className="space-y-2"
+          onSubmit={(event) => {
+            if (!window.confirm(`Reset sandi ${name}? Dia harus membuat sandi baru saat masuk.`)) event.preventDefault();
+          }}
+        >
           <input type="hidden" name="id" value={id} />
-          <input type="hidden" name="password" value="password123" />
-          <button type="submit" className="w-full rounded-lg px-3 py-2 text-left hover:bg-chip">
+          <label className="block text-xs font-medium text-muted">
+            Sandi sementara
+            <input
+              name="password"
+              type="text"
+              required
+              minLength={6}
+              autoComplete="off"
+              className="mt-1 h-9 w-full rounded-lg border border-line px-2 text-sm text-ink"
+            />
+          </label>
+          <button type="submit" className="w-full rounded-lg bg-chip px-3 py-2 text-left text-sm hover:bg-line">
             Reset sandi
           </button>
         </form>

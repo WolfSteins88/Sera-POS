@@ -49,7 +49,7 @@ function href(current: Query, patch: Partial<Query>) {
 }
 
 function formatWhen(value: string | Date) {
-  const date = new Date(new Date(value).getTime() + 7 * 60 * 60 * 1000);
+  const date = new Date(new Date(value).getTime() + 8 * 60 * 60 * 1000);
   const hh = String(date.getUTCHours()).padStart(2, "0");
   const mm = String(date.getUTCMinutes()).padStart(2, "0");
   return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()} ${hh}.${mm}`;

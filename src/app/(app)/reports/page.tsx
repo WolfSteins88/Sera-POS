@@ -99,7 +99,7 @@ function longDate(iso: string) {
 
 function clock(iso: string) {
   return new Intl.DateTimeFormat("id-ID", {
-    timeZone: "Asia/Jakarta",
+    timeZone: "Asia/Makassar",
     day: "numeric",
     month: "short",
     year: "numeric",

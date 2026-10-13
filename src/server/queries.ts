@@ -176,30 +176,30 @@ export async function transactionDesk(filters: {
     SELECT
       COUNT(*) FILTER (
         WHERE status = 'completed'
-          AND (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+          AND (created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
       )::int AS trx_today,
       COUNT(*) FILTER (
         WHERE status = 'completed'
-          AND (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+          AND (created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
       )::int AS trx_yesterday,
       COALESCE(SUM(total) FILTER (
         WHERE status = 'completed'
-          AND (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+          AND (created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
       ), 0)::text AS revenue_today,
       COALESCE(SUM(total) FILTER (
         WHERE status = 'completed'
-          AND (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+          AND (created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
       ), 0)::text AS revenue_yesterday,
       COUNT(*) FILTER (
         WHERE status = 'cancelled'
-          AND (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+          AND (created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
       )::int AS cancel_today,
       COUNT(*) FILTER (
         WHERE status = 'cancelled'
-          AND (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+          AND (created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
       )::int AS cancel_yesterday
     FROM transactions
-    WHERE (created_at AT TIME ZONE 'Asia/Jakarta')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+    WHERE (created_at AT TIME ZONE 'Asia/Makassar')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
   `;
 
   const cashiers = await sql<{ id: string; name: string }[]>`
@@ -213,8 +213,8 @@ export async function transactionDesk(filters: {
     SELECT COUNT(*)::int AS c
     FROM transactions t
     JOIN users u ON u.id = t.user_id
-    WHERE (${from}::date IS NULL OR (t.created_at AT TIME ZONE 'Asia/Jakarta')::date >= ${from}::date)
-      AND (${to}::date IS NULL OR (t.created_at AT TIME ZONE 'Asia/Jakarta')::date <= ${to}::date)
+    WHERE (${from}::date IS NULL OR (t.created_at AT TIME ZONE 'Asia/Makassar')::date >= ${from}::date)
+      AND (${to}::date IS NULL OR (t.created_at AT TIME ZONE 'Asia/Makassar')::date <= ${to}::date)
       AND (${method} = '' OR EXISTS (
         SELECT 1 FROM payments p WHERE p.transaction_id = t.id AND p.method::text = ${method}
       ))
@@ -251,8 +251,8 @@ export async function transactionDesk(filters: {
            COALESCE((SELECT SUM(quantity)::int FROM transaction_items WHERE transaction_id = t.id), 0) AS item_count
     FROM transactions t
     JOIN users u ON u.id = t.user_id
-    WHERE (${from}::date IS NULL OR (t.created_at AT TIME ZONE 'Asia/Jakarta')::date >= ${from}::date)
-      AND (${to}::date IS NULL OR (t.created_at AT TIME ZONE 'Asia/Jakarta')::date <= ${to}::date)
+    WHERE (${from}::date IS NULL OR (t.created_at AT TIME ZONE 'Asia/Makassar')::date >= ${from}::date)
+      AND (${to}::date IS NULL OR (t.created_at AT TIME ZONE 'Asia/Makassar')::date <= ${to}::date)
       AND (${method} = '' OR EXISTS (
         SELECT 1 FROM payments p WHERE p.transaction_id = t.id AND p.method::text = ${method}
       ))
@@ -325,7 +325,7 @@ export async function dashboardStats(shopMode = "fnb") {
       COUNT(*) FILTER (WHERE status = 'completed')::int AS trx_count,
       COALESCE(SUM(total) FILTER (WHERE status = 'completed'), 0)::text AS revenue
     FROM transactions
-    WHERE (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+    WHERE (created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
   `;
   const [openShifts] = await sql`SELECT COUNT(*)::int AS c FROM shifts WHERE status = 'open'`;
   const lowGoods = await sql`
@@ -348,7 +348,7 @@ export async function dashboardStats(shopMode = "fnb") {
     FROM transaction_items ti
     JOIN transactions t ON t.id = ti.transaction_id
     WHERE t.status = 'completed'
-      AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+      AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
     GROUP BY ti.product_name
     ORDER BY qty DESC
     LIMIT 5
@@ -358,11 +358,11 @@ export async function dashboardStats(shopMode = "fnb") {
            COALESCE(SUM(t.total) FILTER (WHERE t.status = 'completed'), 0)::text AS revenue,
            COUNT(*) FILTER (WHERE t.status = 'completed')::int AS trx_count
     FROM generate_series(
-      (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 8,
-      (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date,
+      (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 8,
+      (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date,
       interval '1 day'
     ) AS d
-    LEFT JOIN transactions t ON (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = d::date
+    LEFT JOIN transactions t ON (t.created_at AT TIME ZONE 'Asia/Makassar')::date = d::date
     GROUP BY d
     ORDER BY d
   `;
@@ -392,35 +392,35 @@ export async function fnbDashboard() {
       SELECT
         COALESCE(SUM(total) FILTER (
           WHERE status = 'completed'
-            AND (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+            AND (created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
         ), 0)::text AS revenue_today,
         COALESCE(SUM(total) FILTER (
           WHERE status = 'completed'
-            AND (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+            AND (created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
         ), 0)::text AS revenue_yesterday,
         COUNT(*) FILTER (
           WHERE status = 'completed'
-            AND (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+            AND (created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
         )::int AS trx_today,
         COUNT(*) FILTER (
           WHERE status = 'completed'
-            AND (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+            AND (created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
         )::int AS trx_yesterday
       FROM transactions
-      WHERE (created_at AT TIME ZONE 'Asia/Jakarta')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+      WHERE (created_at AT TIME ZONE 'Asia/Makassar')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
     `,
     sql<{ items_today: number; items_yesterday: number }[]>`
       SELECT
         COALESCE(SUM(ti.quantity) FILTER (
-          WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+          WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
         ), 0)::int AS items_today,
         COALESCE(SUM(ti.quantity) FILTER (
-          WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+          WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
         ), 0)::int AS items_yesterday
       FROM transaction_items ti
       JOIN transactions t ON t.id = ti.transaction_id
       WHERE t.status = 'completed'
-        AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+        AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
     `,
     sql<{ c: number }[]>`SELECT COUNT(*)::int AS c FROM held_orders`,
     sql<{ hour: number; revenue: string; trx_count: number }[]>`
@@ -429,8 +429,8 @@ export async function fnbDashboard() {
              COUNT(t.id) FILTER (WHERE t.status = 'completed')::int AS trx_count
       FROM generate_series(6, 22) AS gs(hour)
       LEFT JOIN transactions t
-        ON (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
-       AND EXTRACT(HOUR FROM (t.created_at AT TIME ZONE 'Asia/Jakarta'))::int = gs.hour::int
+        ON (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
+       AND EXTRACT(HOUR FROM (t.created_at AT TIME ZONE 'Asia/Makassar'))::int = gs.hour::int
       GROUP BY gs.hour
       ORDER BY gs.hour
     `,
@@ -439,29 +439,29 @@ export async function fnbDashboard() {
              COALESCE(SUM(t.total) FILTER (WHERE t.status = 'completed'), 0)::text AS revenue,
              COUNT(t.id) FILTER (WHERE t.status = 'completed')::int AS trx_count
       FROM generate_series(
-        (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 29,
-        (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date,
+        (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 29,
+        (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date,
         interval '1 day'
       ) AS d
       LEFT JOIN transactions t
-        ON (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = d::date
+        ON (t.created_at AT TIME ZONE 'Asia/Makassar')::date = d::date
       GROUP BY d
       ORDER BY d
     `,
     sql<{ name: string; today: string; week: string; month: string }[]>`
       SELECT COALESCE(c.name, 'Lainnya') AS name,
              COALESCE(SUM(ti.subtotal) FILTER (
-               WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+               WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
              ), 0)::text AS today,
              COALESCE(SUM(ti.subtotal) FILTER (
-               WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 6
+               WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 6
              ), 0)::text AS week,
              COALESCE(SUM(ti.subtotal), 0)::text AS month
       FROM transaction_items ti
       JOIN transactions t ON t.id = ti.transaction_id AND t.status = 'completed'
       JOIN products p ON p.id = ti.product_id AND p.catalog_pack = 'fnb'
       LEFT JOIN categories c ON c.id = p.category_id
-      WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 29
+      WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 29
       GROUP BY COALESCE(c.name, 'Lainnya')
       ORDER BY SUM(ti.subtotal) DESC
     `,
@@ -474,7 +474,7 @@ export async function fnbDashboard() {
       JOIN transactions t ON t.id = ti.transaction_id
       LEFT JOIN products p ON p.id = ti.product_id
       WHERE t.status = 'completed'
-        AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+        AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
         AND (p.catalog_pack = 'fnb' OR p.id IS NULL)
       GROUP BY ti.product_name
       ORDER BY qty DESC
@@ -490,7 +490,7 @@ export async function fnbDashboard() {
     }[]>`
       SELECT t.id,
              t.transaction_number,
-             to_char(t.created_at AT TIME ZONE 'Asia/Jakarta', 'HH24.MI') AS time_label,
+             to_char(t.created_at AT TIME ZONE 'Asia/Makassar', 'HH24.MI') AS time_label,
              t.total::text AS total,
              COALESCE((SELECT SUM(quantity)::int FROM transaction_items WHERE transaction_id = t.id), 0) AS item_count,
              (SELECT method FROM payments WHERE transaction_id = t.id ORDER BY created_at LIMIT 1) AS method
@@ -640,12 +640,12 @@ export async function retailDashboard() {
              COALESCE(SUM(t.total) FILTER (WHERE t.status = 'completed'), 0)::text AS revenue,
              COUNT(t.id) FILTER (WHERE t.status = 'completed')::int AS trx_count
       FROM generate_series(
-        (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 59,
-        (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date,
+        (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 59,
+        (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date,
         interval '1 day'
       ) AS d
       LEFT JOIN transactions t
-        ON (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = d::date
+        ON (t.created_at AT TIME ZONE 'Asia/Makassar')::date = d::date
        AND ${retailSale}
       GROUP BY d
       ORDER BY d
@@ -656,8 +656,8 @@ export async function retailDashboard() {
              COUNT(t.id) FILTER (WHERE t.status = 'completed')::int AS trx_count
       FROM generate_series(7, 21) AS gs(hour)
       LEFT JOIN transactions t
-        ON (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
-       AND EXTRACT(HOUR FROM (t.created_at AT TIME ZONE 'Asia/Jakarta'))::int = gs.hour::int
+        ON (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
+       AND EXTRACT(HOUR FROM (t.created_at AT TIME ZONE 'Asia/Makassar'))::int = gs.hour::int
        AND ${retailSale}
       GROUP BY gs.hour
       ORDER BY gs.hour
@@ -665,43 +665,43 @@ export async function retailDashboard() {
     sql<{ items_today: number; items_yesterday: number }[]>`
       SELECT
         COALESCE(SUM(ti.quantity) FILTER (
-          WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+          WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
         ), 0)::int AS items_today,
         COALESCE(SUM(ti.quantity) FILTER (
-          WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+          WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
         ), 0)::int AS items_yesterday
       FROM transaction_items ti
       JOIN transactions t ON t.id = ti.transaction_id AND t.status = 'completed'
       JOIN products p ON p.id = ti.product_id AND p.catalog_pack = 'retail'
-      WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+      WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
     `,
     sql<{ customers_today: number; customers_yesterday: number }[]>`
       SELECT
         COUNT(DISTINCT NULLIF(BTRIM(t.customer_name), '')) FILTER (
-          WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+          WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
         )::int AS customers_today,
         COUNT(DISTINCT NULLIF(BTRIM(t.customer_name), '')) FILTER (
-          WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+          WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
         )::int AS customers_yesterday
       FROM transactions t
       WHERE t.status = 'completed'
-        AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 1
+        AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 1
         AND ${retailSale}
     `,
     sql<{ name: string; today: string; week: string; month: string }[]>`
       SELECT COALESCE(c.name, 'Lainnya') AS name,
              COALESCE(SUM(ti.subtotal) FILTER (
-               WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+               WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
              ), 0)::text AS today,
              COALESCE(SUM(ti.subtotal) FILTER (
-               WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 6
+               WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 6
              ), 0)::text AS week,
              COALESCE(SUM(ti.subtotal), 0)::text AS month
       FROM transaction_items ti
       JOIN transactions t ON t.id = ti.transaction_id AND t.status = 'completed'
       JOIN products p ON p.id = ti.product_id AND p.catalog_pack = 'retail'
       LEFT JOIN categories c ON c.id = p.category_id
-      WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date - 29
+      WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date >= (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date - 29
       GROUP BY COALESCE(c.name, 'Lainnya')
       ORDER BY SUM(ti.subtotal) DESC
     `,
@@ -713,7 +713,7 @@ export async function retailDashboard() {
       FROM transaction_items ti
       JOIN transactions t ON t.id = ti.transaction_id AND t.status = 'completed'
       JOIN products p ON p.id = ti.product_id AND p.catalog_pack = 'retail'
-      WHERE (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+      WHERE (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date
       GROUP BY ti.product_name
       ORDER BY qty DESC
       LIMIT 5
@@ -721,7 +721,7 @@ export async function retailDashboard() {
     sql<{ id: string; transaction_number: string; time_label: string; customer_name: string; total: string }[]>`
       SELECT t.id,
              t.transaction_number,
-             to_char(t.created_at AT TIME ZONE 'Asia/Jakarta', 'HH24:MI') AS time_label,
+             to_char(t.created_at AT TIME ZONE 'Asia/Makassar', 'HH24:MI') AS time_label,
              COALESCE(NULLIF(BTRIM(t.customer_name), ''), 'Walk-in') AS customer_name,
              t.total::text AS total
       FROM transactions t
@@ -974,20 +974,20 @@ export async function shiftDesk(filters: {
       (SELECT COUNT(*)::int FROM shifts WHERE status = 'open') AS open_count,
       (SELECT COUNT(*)::int FROM shifts
         WHERE status = 'closed'
-          AND (closing_at AT TIME ZONE 'Asia/Jakarta')::date = (now() AT TIME ZONE 'Asia/Jakarta')::date) AS closed_today,
+          AND (closing_at AT TIME ZONE 'Asia/Makassar')::date = (now() AT TIME ZONE 'Asia/Makassar')::date) AS closed_today,
       (SELECT COALESCE(SUM(EXTRACT(EPOCH FROM (COALESCE(closing_at, now()) - opening_at))), 0)::text
         FROM shifts
-        WHERE (opening_at AT TIME ZONE 'Asia/Jakarta')::date = (now() AT TIME ZONE 'Asia/Jakarta')::date) AS duration_seconds,
+        WHERE (opening_at AT TIME ZONE 'Asia/Makassar')::date = (now() AT TIME ZONE 'Asia/Makassar')::date) AS duration_seconds,
       (SELECT COALESCE(SUM(t.total), 0)::text
         FROM transactions t
         JOIN payments p ON p.transaction_id = t.id
         WHERE t.status = 'completed' AND p.method = 'cash'
-          AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (now() AT TIME ZONE 'Asia/Jakarta')::date) AS cash_today,
+          AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date = (now() AT TIME ZONE 'Asia/Makassar')::date) AS cash_today,
       (SELECT COALESCE(SUM(t.total), 0)::text
         FROM transactions t
         JOIN payments p ON p.transaction_id = t.id
         WHERE t.status = 'completed' AND p.method = 'cash'
-          AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = ((now() AT TIME ZONE 'Asia/Jakarta')::date - 1)) AS cash_yesterday
+          AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date = ((now() AT TIME ZONE 'Asia/Makassar')::date - 1)) AS cash_yesterday
   `;
   const raw = await sql<{
     id: string;
@@ -1022,9 +1022,9 @@ export async function shiftDesk(filters: {
         s.difference::text AS difference,
         s.status::text AS status,
         s.note,
-        'SH-' || to_char(s.opening_at AT TIME ZONE 'Asia/Jakarta', 'YYYYMMDD') || '-' ||
+        'SH-' || to_char(s.opening_at AT TIME ZONE 'Asia/Makassar', 'YYYYMMDD') || '-' ||
           lpad(row_number() OVER (
-            PARTITION BY (s.opening_at AT TIME ZONE 'Asia/Jakarta')::date
+            PARTITION BY (s.opening_at AT TIME ZONE 'Asia/Makassar')::date
             ORDER BY s.opening_at, s.id
           )::text, 3, '0') AS shift_number
       FROM shifts s
@@ -1080,7 +1080,7 @@ export async function shiftDesk(filters: {
     if (status && row.status !== status) return false;
     if (filters.cashierId && row.userId !== filters.cashierId) return false;
     if (date) {
-      const opened = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date(row.openingAt));
+      const opened = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar" }).format(new Date(row.openingAt));
       if (opened !== date) return false;
     }
     if (search && !row.cashierName.toLowerCase().includes(search) && !row.shiftNumber.toLowerCase().includes(search)) return false;
@@ -1111,7 +1111,7 @@ const REPORT_METHODS = ["cash", "qris", "debit", "credit", "ewallet"] as const;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 function reportToday() {
-  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date());
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Makassar" }).format(new Date());
 }
 
 function reportDay(value: string | undefined, fallback: string) {
@@ -1159,7 +1159,7 @@ export async function reportDesk(filters: { from?: string; to?: string; cashierI
           COALESCE(SUM(discount) FILTER (WHERE day BETWEEN ${prevFrom}::date AND ${prevTo}::date), 0)::float8 AS prev_discount
         FROM (
           SELECT
-            (t.created_at AT TIME ZONE 'Asia/Jakarta')::date AS day,
+            (t.created_at AT TIME ZONE 'Asia/Makassar')::date AS day,
             t.total,
             t.discount
           FROM transactions t
@@ -1167,14 +1167,14 @@ export async function reportDesk(filters: { from?: string; to?: string; cashierI
             SELECT method FROM payments WHERE transaction_id = t.id ORDER BY created_at LIMIT 1
           ) pay ON true
           WHERE t.status = 'completed'
-            AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date BETWEEN ${prevFrom}::date AND ${to}::date
+            AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date BETWEEN ${prevFrom}::date AND ${to}::date
             AND (${cashier}::uuid IS NULL OR t.user_id = ${cashier}::uuid)
             AND (${method}::text IS NULL OR pay.method::text = ${method})
         ) scoped
       `,
       sql<{ hour: number; trx: number; sales: number }[]>`
         SELECT
-          EXTRACT(HOUR FROM (t.created_at AT TIME ZONE 'Asia/Jakarta'))::int AS hour,
+          EXTRACT(HOUR FROM (t.created_at AT TIME ZONE 'Asia/Makassar'))::int AS hour,
           COUNT(*)::int AS trx,
           COALESCE(SUM(t.total), 0)::float8 AS sales
         FROM transactions t
@@ -1182,7 +1182,7 @@ export async function reportDesk(filters: { from?: string; to?: string; cashierI
           SELECT method FROM payments WHERE transaction_id = t.id ORDER BY created_at LIMIT 1
         ) pay ON true
         WHERE t.status = 'completed'
-          AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date BETWEEN ${from}::date AND ${to}::date
+          AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date BETWEEN ${from}::date AND ${to}::date
           AND (${cashier}::uuid IS NULL OR t.user_id = ${cashier}::uuid)
           AND (${method}::text IS NULL OR pay.method::text = ${method})
         GROUP BY 1
@@ -1200,7 +1200,7 @@ export async function reportDesk(filters: { from?: string; to?: string; cashierI
           SELECT method FROM payments WHERE transaction_id = t.id ORDER BY created_at LIMIT 1
         ) pay ON true
         WHERE t.status = 'completed'
-          AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date BETWEEN ${from}::date AND ${to}::date
+          AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date BETWEEN ${from}::date AND ${to}::date
           AND (${cashier}::uuid IS NULL OR t.user_id = ${cashier}::uuid)
           AND (${method}::text IS NULL OR pay.method::text = ${method})
         GROUP BY c.id, c.name
@@ -1222,7 +1222,7 @@ export async function reportDesk(filters: { from?: string; to?: string; cashierI
           SELECT method FROM payments WHERE transaction_id = t.id ORDER BY created_at LIMIT 1
         ) pay ON true
         WHERE t.status = 'completed'
-          AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date BETWEEN ${from}::date AND ${to}::date
+          AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date BETWEEN ${from}::date AND ${to}::date
           AND (${cashier}::uuid IS NULL OR t.user_id = ${cashier}::uuid)
           AND (${method}::text IS NULL OR pay.method::text = ${method})
         GROUP BY ti.product_id, ti.product_name, p.image, c.name
@@ -1236,14 +1236,14 @@ export async function reportDesk(filters: { from?: string; to?: string; cashierI
         ) pay ON true
         WHERE t.status = 'completed'
           AND pay.method IS NOT NULL
-          AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date BETWEEN ${from}::date AND ${to}::date
+          AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date BETWEEN ${from}::date AND ${to}::date
           AND (${cashier}::uuid IS NULL OR t.user_id = ${cashier}::uuid)
           AND (${method}::text IS NULL OR pay.method::text = ${method})
         GROUP BY pay.method
       `,
       sql<{ day: string; trx: number; total: number }[]>`
         SELECT
-          (t.created_at AT TIME ZONE 'Asia/Jakarta')::date::text AS day,
+          (t.created_at AT TIME ZONE 'Asia/Makassar')::date::text AS day,
           COUNT(*)::int AS trx,
           COALESCE(SUM(t.total), 0)::float8 AS total
         FROM transactions t
@@ -1251,7 +1251,7 @@ export async function reportDesk(filters: { from?: string; to?: string; cashierI
           SELECT method FROM payments WHERE transaction_id = t.id ORDER BY created_at LIMIT 1
         ) pay ON true
         WHERE t.status = 'completed'
-          AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date BETWEEN ${from}::date AND ${to}::date
+          AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date BETWEEN ${from}::date AND ${to}::date
           AND (${cashier}::uuid IS NULL OR t.user_id = ${cashier}::uuid)
           AND (${method}::text IS NULL OR pay.method::text = ${method})
         GROUP BY 1
@@ -1265,7 +1265,7 @@ export async function reportDesk(filters: { from?: string; to?: string; cashierI
           SELECT method FROM payments WHERE transaction_id = t.id ORDER BY created_at LIMIT 1
         ) pay ON true
         WHERE t.status = 'completed'
-          AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date BETWEEN ${from}::date AND ${to}::date
+          AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date BETWEEN ${from}::date AND ${to}::date
           AND (${cashier}::uuid IS NULL OR t.user_id = ${cashier}::uuid)
           AND (${method}::text IS NULL OR pay.method::text = ${method})
         GROUP BY u.id, u.name
@@ -1273,7 +1273,7 @@ export async function reportDesk(filters: { from?: string; to?: string; cashierI
       `,
       sql<{ day: string; tax: number; service: number }[]>`
         SELECT
-          (t.created_at AT TIME ZONE 'Asia/Jakarta')::date::text AS day,
+          (t.created_at AT TIME ZONE 'Asia/Makassar')::date::text AS day,
           COALESCE(SUM(t.tax), 0)::float8 AS tax,
           COALESCE(SUM(t.service_charge), 0)::float8 AS service
         FROM transactions t
@@ -1281,7 +1281,7 @@ export async function reportDesk(filters: { from?: string; to?: string; cashierI
           SELECT method FROM payments WHERE transaction_id = t.id ORDER BY created_at LIMIT 1
         ) pay ON true
         WHERE t.status = 'completed'
-          AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date BETWEEN ${from}::date AND ${to}::date
+          AND (t.created_at AT TIME ZONE 'Asia/Makassar')::date BETWEEN ${from}::date AND ${to}::date
           AND (${cashier}::uuid IS NULL OR t.user_id = ${cashier}::uuid)
           AND (${method}::text IS NULL OR pay.method::text = ${method})
         GROUP BY 1
@@ -1306,7 +1306,7 @@ export async function reportDesk(filters: { from?: string; to?: string; cashierI
           s.difference::float8 AS difference
         FROM shifts s
         JOIN users u ON u.id = s.user_id
-        WHERE (s.opening_at AT TIME ZONE 'Asia/Jakarta')::date BETWEEN ${from}::date AND ${to}::date
+        WHERE (s.opening_at AT TIME ZONE 'Asia/Makassar')::date BETWEEN ${from}::date AND ${to}::date
           AND (${cashier}::uuid IS NULL OR s.user_id = ${cashier}::uuid)
           AND (
             ${method}::text IS NULL

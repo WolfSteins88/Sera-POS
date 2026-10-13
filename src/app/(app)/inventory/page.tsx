@@ -27,7 +27,7 @@ function stockText(value: number) {
 
 function clock(value: Date) {
   return new Intl.DateTimeFormat("id-ID", {
-    timeZone: "Asia/Jakarta",
+    timeZone: "Asia/Makassar",
     day: "numeric",
     month: "short",
     year: "numeric",

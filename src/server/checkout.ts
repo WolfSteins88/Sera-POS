@@ -37,13 +37,13 @@ function n(v: string | number | null | undefined) {
 async function nextTransactionNumber(sql: SqlClient) {
   const [row] = await sql<{ last_seq: number }[]>`
     INSERT INTO transaction_counters (day, last_seq)
-    VALUES ((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date, 1)
+    VALUES ((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date, 1)
     ON CONFLICT (day) DO UPDATE
       SET last_seq = transaction_counters.last_seq + 1
     RETURNING last_seq, day
   `;
   const [dayRow] = await sql<{ day: string }[]>`
-    SELECT to_char((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date, 'YYYYMMDD') AS day
+    SELECT to_char((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date, 'YYYYMMDD') AS day
   `;
   return `CS-${dayRow.day}-${String(row.last_seq).padStart(5, "0")}`;
 }

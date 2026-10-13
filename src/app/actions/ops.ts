@@ -1,8 +1,5 @@
 "use server";
 
-import { copyFile } from "node:fs/promises";
-import path from "node:path";
-import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { and, count, eq, ne } from "drizzle-orm";
@@ -12,7 +9,7 @@ import { can } from "@/lib/rbac";
 import { getDb } from "@/lib/db";
 import { getSql } from "@/lib/db";
 import { parseIdNumber } from "@/lib/format";
-import { saveUpload } from "@/lib/images/save-local";
+import { copyUpload, saveUpload } from "@/lib/images/save-local";
 import { getSetting } from "@/lib/settings";
 import { restoreBackupDump, type BackupDump } from "@/lib/backup";
 import { RECEIPT_TOGGLES } from "@/lib/receipt";
@@ -584,17 +581,7 @@ export async function duplicateRecipe(formData: FormData) {
 }
 
 async function copyRecipeImage(filename: string | null) {
-  if (!filename) return null;
-  const safe = path.basename(filename);
-  if (safe !== filename) return null;
-  const next = `${randomBytes(12).toString("hex")}${path.extname(safe)}`;
-  const dir = path.join(process.cwd(), "storage", "uploads", "products");
-  try {
-    await copyFile(path.join(dir, safe), path.join(dir, next));
-    return next;
-  } catch {
-    return null;
-  }
+  return copyUpload("products", filename);
 }
 
 export async function openShift(formData: FormData) {
@@ -727,7 +714,7 @@ export async function holdOrderAction(label: string, cart: unknown) {
   guard(session.role, "pos");
   await getDb().insert(heldOrders).values({
     userId: session.id,
-    label: label.trim() || `Hold ${new Date().toLocaleTimeString("id-ID")}`,
+    label: label.trim() || `Hold ${new Date().toLocaleTimeString("id-ID", { timeZone: "Asia/Makassar" })}`,
     cartJson: cart as object,
   });
   revalidatePath("/pos");
@@ -785,10 +772,13 @@ export async function saveUser(formData: FormData) {
 export async function resetUserPassword(formData: FormData) {
   const session = await requireSession();
   guard(session.role, "users");
-  const hash = await bcrypt.hash(str(formData, "password") || "password123", 12);
+  const password = str(formData, "password");
+  if (password.length < 6) throw new Error("Password sementara minimal 6 karakter.");
+  const hash = await bcrypt.hash(password, 12);
+  // The temporary password only gets them in; they must choose their own at next login.
   await getDb()
     .update(users)
-    .set({ passwordHash: hash, updatedAt: new Date() })
+    .set({ passwordHash: hash, mustChangePassword: true, updatedAt: new Date() })
     .where(eq(users.id, str(formData, "id")));
   revalidatePath("/users");
 }

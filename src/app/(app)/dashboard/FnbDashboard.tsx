@@ -14,7 +14,7 @@ type Data = Awaited<ReturnType<typeof fnbDashboard>>;
 const CARD = "rounded-2xl border border-line bg-surface p-5 shadow-card";
 const WEEKDAYS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"] as const;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"] as const;
-const JAKARTA_OFFSET_MS = 7 * 60 * 60 * 1000;
+const WITA_OFFSET_MS = 8 * 60 * 60 * 1000;
 const PAYMENT_LABEL: Record<string, string> = {
   cash: "Tunai",
   qris: "QRIS",
@@ -30,18 +30,18 @@ const PAYMENT_CLASS: Record<string, string> = {
   ewallet: "bg-accent-soft text-accent",
 };
 
-function jakartaDate(value: string | Date | number = Date.now()) {
-  return new Date(new Date(value).getTime() + JAKARTA_OFFSET_MS);
+function witaDate(value: string | Date | number = Date.now()) {
+  return new Date(new Date(value).getTime() + WITA_OFFSET_MS);
 }
 
 function greeting(name: string) {
-  const hour = jakartaDate().getUTCHours();
+  const hour = witaDate().getUTCHours();
   const hello = hour < 11 ? "Selamat pagi" : hour < 15 ? "Selamat siang" : hour < 19 ? "Selamat sore" : "Selamat malam";
   return `${hello}, ${name.split(" ")[0]}`;
 }
 
-function formatJakarta(value: string | Date | number, withTime = false) {
-  const date = jakartaDate(value);
+function formatWitaDate(value: string | Date | number, withTime = false) {
+  const date = witaDate(value);
   const day = `${WEEKDAYS[date.getUTCDay()]}, ${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
   if (!withTime) return day;
   const hh = String(date.getUTCHours()).padStart(2, "0");
@@ -90,7 +90,7 @@ export function FnbDashboard({ data, userName }: { data: Data; userName: string 
         <div className="flex max-w-xl flex-wrap items-center justify-end gap-2">
           <span className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-3 text-sm shadow-card">
             <Calendar size={16} aria-hidden />
-            {formatJakarta(Date.now())}
+            {formatWitaDate(Date.now())}
           </span>
           <WitaClock />
         </div>
@@ -142,7 +142,7 @@ export function FnbDashboard({ data, userName }: { data: Data; userName: string 
               <dl className="mt-4 space-y-2 text-sm">
                 <div className="flex justify-between gap-3">
                   <dt className="text-muted">Mulai</dt>
-                  <dd className="text-right">{formatJakarta(data.shift.openingAt, true)}</dd>
+                  <dd className="text-right">{formatWitaDate(data.shift.openingAt, true)}</dd>
                 </div>
                 <div className="flex justify-between gap-3">
                   <dt className="text-muted">Modal awal</dt>

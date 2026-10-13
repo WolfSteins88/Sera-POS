@@ -50,6 +50,8 @@ export type SessionUser = {
   name: string;
   username: string;
   role: "ADMIN" | "MANAGER" | "CASHIER";
+  /** Set after an admin reset; the user has to choose a new password before doing anything else. */
+  mustChangePassword?: boolean;
 };
 
 export async function encodeSession(user: SessionUser) {
