@@ -128,6 +128,28 @@ Akun seed (password `password123`):
 
 Variabel lingkungan ada di `.env.example`. Jangan commit `.env.local`.
 
+## Aplikasi desktop (Windows, offline)
+
+Sora POS juga bisa dipasang sebagai aplikasi desktop dengan [Tauri](https://tauri.app). Aplikasi ini berjalan tanpa internet dan tanpa PostgreSQL terpisah.
+
+- Database memakai [PGlite](https://pglite.dev), yaitu PostgreSQL yang berjalan di dalam aplikasi dan menyimpan data di folder lokal. Semua query yang sama dengan versi web tetap dipakai.
+- Data tersimpan di `%APPDATA%\id.sora.pos` (database di `db`, foto di `uploads`). Log server ada di `%LOCALAPPDATA%\id.sora.pos\logs\server.log`. Cadangkan dengan **Unduh backup JSON** di Pengaturan.
+- Saat pertama dibuka, database dibuat dan diisi data demo (akun seperti di atas). Setiap kali dibuka, migrasi baru dijalankan tanpa mengubah data.
+- Versi desktop berdiri sendiri. Datanya belum tersinkron dengan database versi web.
+
+Cara kerja: jendela Tauri menjalankan Node.js bawaan (`desktop/launcher.mjs`), yang membuka PGlite, menjalankan migrasi, lalu menyalakan server Next.js di `127.0.0.1` dan menampilkannya di jendela.
+
+Membuat installer Windows (butuh [Rust](https://rustup.rs) dan Node.js 22):
+
+```bash
+npm install
+npm run desktop:build
+```
+
+Installer ada di `src-tauri/target/release/bundle/nsis` dan `.../msi`. Installer juga dibuat otomatis oleh GitHub Actions (workflow **Desktop build**, bisa dijalankan manual), lalu diunduh dari tab Artifacts.
+
+Mencoba di komputer pengembang: `npm run desktop:dev`. Untuk mencoba server desktop tanpa jendela Tauri: `npm run desktop:prepare` lalu `node desktop/dist/app/launcher.mjs` (data di `.desktop-data/`).
+
 ## Alur uji penjualan
 
 1. Login kasir, buka shift.

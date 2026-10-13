@@ -15,7 +15,8 @@ const globalForSql = globalThis as unknown as { sql?: ReturnType<typeof postgres
 export function getSql() {
   if (!globalForSql.sql) {
     globalForSql.sql = postgres(databaseUrl(), {
-      max: 10,
+      // The desktop app's embedded PGlite serves one connection at a time.
+      max: Number(process.env.DB_POOL_MAX) || 10,
       idle_timeout: 20,
       connect_timeout: 10,
     });

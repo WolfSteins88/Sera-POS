@@ -5,7 +5,9 @@ import { IMAGE_KINDS, IMAGE_MAX_BYTES, IMAGE_MIME, type ImageKind } from "./type
 import { copyObject, removeObject, uploadObject } from "./supabase-store";
 
 function dirFor(kind: ImageKind) {
-  return path.join(process.cwd(), "storage", "uploads", kind);
+  // The desktop app points UPLOADS_DIR at its per-user data folder, since the install folder is read-only.
+  const root = process.env.UPLOADS_DIR || path.join(process.cwd(), "storage", "uploads");
+  return path.join(root, kind);
 }
 
 /** "supabase" keeps images in Supabase Storage; "local" writes to storage/uploads (lost on serverless redeploys). */

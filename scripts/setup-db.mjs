@@ -56,6 +56,13 @@ for (const file of migrationFiles) {
   console.log(`Applied ${file}`);
 }
 
+// The desktop app runs migrations on every start but only seeds a brand-new database,
+// because the seed below also deactivates products that are not in the demo list.
+if (process.env.SETUP_MIGRATE_ONLY === "1") {
+  await sql.end();
+  process.exit(0);
+}
+
 const passwordHash = bcrypt.hashSync("password123", 12);
 
 async function ensureUser(role, name, username, email) {

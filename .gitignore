@@ -44,3 +44,7 @@ next-env.d.ts
 # local product/category/logo uploads
 /storage/uploads/**
 !/storage/uploads/**/.gitkeep
+
+# desktop (Tauri) build output and local desktop data
+/desktop/dist/
+/.desktop-data/
