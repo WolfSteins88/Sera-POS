@@ -325,7 +325,7 @@ export async function dashboardStats(shopMode = "fnb") {
       COUNT(*) FILTER (WHERE status = 'completed')::int AS trx_count,
       COALESCE(SUM(total) FILTER (WHERE status = 'completed'), 0)::text AS revenue
     FROM transactions
-    WHERE created_at::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+    WHERE (created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
   `;
   const [openShifts] = await sql`SELECT COUNT(*)::int AS c FROM shifts WHERE status = 'open'`;
   const lowGoods = await sql`
@@ -348,7 +348,7 @@ export async function dashboardStats(shopMode = "fnb") {
     FROM transaction_items ti
     JOIN transactions t ON t.id = ti.transaction_id
     WHERE t.status = 'completed'
-      AND t.created_at::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
+      AND (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date
     GROUP BY ti.product_name
     ORDER BY qty DESC
     LIMIT 5
@@ -362,7 +362,7 @@ export async function dashboardStats(shopMode = "fnb") {
       (CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date,
       interval '1 day'
     ) AS d
-    LEFT JOIN transactions t ON t.created_at::date = d::date
+    LEFT JOIN transactions t ON (t.created_at AT TIME ZONE 'Asia/Jakarta')::date = d::date
     GROUP BY d
     ORDER BY d
   `;

@@ -231,6 +231,7 @@ export function ProductForm({
                         <label className="block text-sm">
                           <span className="mb-1 block font-medium">Stok Saat Ini</span>
                           <IdNumberInput name="currentStock" defaultValue={product?.currentStock ?? "0"} />
+                          {product ? <input type="hidden" name="stockLoaded" value={product.currentStock} /> : null}
                         </label>
                         <label className="block text-sm">
                           <span className="mb-1 block font-medium">Minimum Stok</span>

@@ -5,7 +5,7 @@ import path from "node:path";
 import { randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { count, eq, ne } from "drizzle-orm";
+import { and, count, eq, ne } from "drizzle-orm";
 import bcrypt from "bcryptjs";
 import { requireSession } from "@/lib/auth";
 import { can } from "@/lib/rbac";
@@ -34,11 +34,12 @@ import {
   settings,
   shifts,
   transactionCounters,
+  transactionItems,
   transactions,
   users,
 } from "@/lib/schema";
 import { cancelTransaction, checkoutTransaction, type CartItemInput } from "@/server/checkout";
-import { getOpenShift, writeUnlockedRecipeCosts } from "@/server/queries";
+import { writeUnlockedRecipeCosts } from "@/server/queries";
 
 function guard(role: string, module: Parameters<typeof can>[1]) {
   if (!can(role as "ADMIN" | "MANAGER" | "CASHIER", module)) {
@@ -169,6 +170,13 @@ export async function saveProduct(formData: FormData) {
     if (!category || category.catalogPack !== catalogPack) {
       throw new Error("Kategori tidak cocok dengan katalog.");
     }
+    // Keep the live stock unless the user actually changed it, so sales made while the form was open aren't undone.
+    const loaded = formData.get("stockLoaded");
+    if (values.kind === "goods" && loaded !== null && Math.abs(Number(loaded) - Number(values.currentStock)) < 0.0005) {
+      values.currentStock = String(existing.currentStock);
+      if (Number(existing.currentStock) <= 0) values.stockStatus = "sold_out";
+      else if (str(formData, "stockStatus") !== "sold_out") values.stockStatus = "available";
+    }
     const image = await saveUpload(imageFile, "products", existing.image);
     await db.update(products).set({ ...values, image }).where(eq(products.id, id));
     revalidateProductViews(id);
@@ -194,7 +202,12 @@ export async function saveProduct(formData: FormData) {
 export async function deleteProduct(formData: FormData) {
   const session = await requireSession();
   guard(session.role, "products");
-  await getDb().delete(products).where(eq(products.id, str(formData, "id")));
+  const id = str(formData, "id");
+  const [sold] = await getDb().select({ c: count() }).from(transactionItems).where(eq(transactionItems.productId, id));
+  if (Number(sold?.c ?? 0) > 0) {
+    throw new Error("Produk ini sudah pernah terjual. Nonaktifkan saja agar riwayat transaksi tetap utuh.");
+  }
+  await getDb().delete(products).where(eq(products.id, id));
   revalidatePath("/products");
   revalidatePath("/pos");
   if (str(formData, "next") === "desk") redirect("/products");
@@ -358,9 +371,12 @@ export async function saveInventoryItem(formData: FormData) {
     const [existing] = await db.select().from(inventoryItems).where(eq(inventoryItems.id, id)).limit(1);
     if (!existing) throw new Error("Bahan tidak ditemukan.");
     const image = await saveUpload(imageFile, "inventory", existing.image);
-    const nextStock = num(formData, "currentStock");
-    if (nextStock < 0) throw new Error("Stok tidak boleh negatif.");
     const before = Number(existing.currentStock);
+    const loaded = formData.get("stockLoaded");
+    // Keep the live stock unless the user actually changed it, so sales made while the form was open aren't undone.
+    const untouched = loaded !== null && Math.abs(Number(loaded) - num(formData, "currentStock")) < 0.0005;
+    const nextStock = untouched ? before : num(formData, "currentStock");
+    if (nextStock < 0) throw new Error("Stok tidak boleh negatif.");
     const { sku: _sku, ...rest } = values;
     await db.update(inventoryItems).set({ ...rest, currentStock: String(nextStock), sku: existing.sku, image }).where(eq(inventoryItems.id, id));
     if (Math.abs(nextStock - before) > 0.0005) {
@@ -401,7 +417,9 @@ export async function moveInventory(formData: FormData) {
   guard(session.role, "inventory");
   const id = str(formData, "id");
   const type = str(formData, "type") as "in" | "out" | "adjustment";
-  const quantity = num(formData, "quantity");
+  // Plain text field: "0.250" kg means a quarter kilo here, not 250.
+  const rawQuantity = str(formData, "quantity");
+  const quantity = /^-?\d+(\.\d+)?$/.test(rawQuantity) ? Number(rawQuantity) : num(formData, "quantity");
   const note = str(formData, "note") || null;
   if (!["in", "out", "adjustment"].includes(type) || quantity < 0 || (quantity === 0 && type !== "adjustment")) {
     throw new Error("Pergerakan stok tidak valid.");
@@ -584,13 +602,15 @@ export async function openShift(formData: FormData) {
   guard(session.role, "shifts");
   const openingCash = num(formData, "openingCash");
   if (openingCash < 0) throw new Error("Modal awal tidak valid.");
-  const existing = await getOpenShift(session.id);
-  if (existing) throw new Error("Shift sudah terbuka.");
-  await getDb().insert(shifts).values({
-    userId: session.id,
-    openingCash: String(openingCash),
-    openingAt: new Date(),
-    status: "open",
+  // Lock per user so a double tap can't open two shifts at once.
+  await getSql().begin(async (tx) => {
+    await tx`SELECT pg_advisory_xact_lock(hashtext(${"shift:" + session.id}))`;
+    const [existing] = await tx`SELECT id FROM shifts WHERE user_id = ${session.id} AND status = 'open' LIMIT 1`;
+    if (existing) throw new Error("Shift sudah terbuka.");
+    await tx`
+      INSERT INTO shifts (user_id, opening_cash, opening_at, status)
+      VALUES (${session.id}, ${openingCash}, NOW(), 'open')
+    `;
   });
   revalidatePath("/shifts");
   revalidatePath("/pos");
@@ -599,21 +619,24 @@ export async function openShift(formData: FormData) {
 export async function closeShift(formData: FormData) {
   const session = await requireSession();
   guard(session.role, "shifts");
-  const current = await getOpenShift(session.id);
-  if (!current) throw new Error("Tidak ada shift yang terbuka.");
   const actual = num(formData, "actualCash");
-  const expected = Number(current.openingCash) + Number(current.cashSales);
-  await getDb()
-    .update(shifts)
-    .set({
-      closingCash: String(actual),
-      closingAt: new Date(),
-      expectedCash: String(expected),
-      difference: String(actual - expected),
-      status: "closed",
-      note: str(formData, "note") || null,
-    })
-    .where(eq(shifts.id, current.id));
+  if (actual < 0) throw new Error("Kas tutup tidak valid.");
+  const note = str(formData, "note") || null;
+  // Lock the shift row so a sale finishing at the same moment is either counted here or refused.
+  await getSql().begin(async (tx) => {
+    const [current] = await tx<{ id: string; opening_cash: string; cash_sales: string }[]>`
+      SELECT id, opening_cash::text, cash_sales::text
+      FROM shifts WHERE user_id = ${session.id} AND status = 'open' LIMIT 1 FOR UPDATE
+    `;
+    if (!current) throw new Error("Tidak ada shift yang terbuka.");
+    const expected = Number(current.opening_cash) + Number(current.cash_sales);
+    await tx`
+      UPDATE shifts
+      SET closing_cash = ${actual}, closing_at = NOW(), expected_cash = ${expected},
+          difference = ${actual - expected}, status = 'closed', note = ${note}
+      WHERE id = ${current.id}
+    `;
+  });
   revalidatePath("/shifts");
 }
 
@@ -713,14 +736,15 @@ export async function holdOrderAction(label: string, cart: unknown) {
 export async function deleteHeldAction(id: string) {
   const session = await requireSession();
   guard(session.role, "pos");
-  await getDb().delete(heldOrders).where(eq(heldOrders.id, id));
+  const own = session.role === "CASHIER" ? eq(heldOrders.userId, session.id) : undefined;
+  await getDb().delete(heldOrders).where(own ? and(eq(heldOrders.id, id), own) : eq(heldOrders.id, id));
   revalidatePath("/pos");
 }
 
 export async function cancelTransactionAction(formData: FormData) {
   const session = await requireSession();
   guard(session.role, "transactions");
-  await cancelTransaction(str(formData, "id"), session.id);
+  await cancelTransaction(str(formData, "id"), { id: session.id, role: session.role });
   revalidatePath("/transactions");
   revalidatePath("/inventory");
   revalidatePath("/products");
@@ -774,7 +798,16 @@ export async function deleteUser(formData: FormData) {
   guard(session.role, "users");
   const id = str(formData, "id");
   if (id === session.id) throw new Error("Tidak bisa menghapus akun sendiri.");
-  await getDb().delete(users).where(eq(users.id, id));
+  const db = getDb();
+  const [used] = await db.select({ c: count() }).from(shifts).where(eq(shifts.userId, id));
+  const [sold] = await db.select({ c: count() }).from(transactions).where(eq(transactions.userId, id));
+  if (Number(used?.c ?? 0) > 0 || Number(sold?.c ?? 0) > 0) {
+    throw new Error("Pengguna ini punya shift atau transaksi. Nonaktifkan saja agar riwayat tetap utuh.");
+  }
+  await db.transaction(async (tx) => {
+    await tx.update(inventoryMovements).set({ userId: null }).where(eq(inventoryMovements.userId, id));
+    await tx.delete(users).where(eq(users.id, id));
+  });
   revalidatePath("/users");
 }
 
@@ -910,24 +943,26 @@ export async function purgeShopData(formData: FormData) {
     redirect("/settings?purgeError=" + encodeURIComponent("Hapus transaksi dan shift dulu sebelum menghapus pengguna lain."));
   }
 
-  if (picked.has("transactions")) {
-    await db.delete(transactions);
-    await db.delete(heldOrders);
-    await db.delete(transactionCounters);
-  }
-  if (picked.has("shifts")) await db.delete(shifts);
-  if (picked.has("recipes")) await db.delete(recipes);
-  if (picked.has("products")) {
-    await db.delete(products);
-    await db.delete(addons);
-  }
-  if (picked.has("categories")) await db.delete(categories);
-  if (picked.has("inventory")) await db.delete(inventoryItems);
-  if (picked.has("users")) {
-    await db.update(inventoryMovements).set({ userId: null }).where(ne(inventoryMovements.userId, session.id));
-    await db.delete(users).where(ne(users.id, session.id));
-  }
-  if (picked.has("printers")) await db.delete(printers);
+  await db.transaction(async (tx) => {
+    if (picked.has("transactions")) {
+      await tx.delete(transactions);
+      await tx.delete(heldOrders);
+      await tx.delete(transactionCounters);
+    }
+    if (picked.has("shifts")) await tx.delete(shifts);
+    if (picked.has("recipes")) await tx.delete(recipes);
+    if (picked.has("products")) {
+      await tx.delete(products);
+      await tx.delete(addons);
+    }
+    if (picked.has("categories")) await tx.delete(categories);
+    if (picked.has("inventory")) await tx.delete(inventoryItems);
+    if (picked.has("users")) {
+      await tx.update(inventoryMovements).set({ userId: null }).where(ne(inventoryMovements.userId, session.id));
+      await tx.delete(users).where(ne(users.id, session.id));
+    }
+    if (picked.has("printers")) await tx.delete(printers);
+  });
 
   revalidatePath("/", "layout");
   for (const path of ["/settings", "/dashboard", "/pos", "/products", "/categories", "/inventory", "/recipes", "/shifts", "/transactions", "/reports", "/users", "/printer"]) {

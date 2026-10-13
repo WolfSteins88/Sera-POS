@@ -156,6 +156,7 @@ export function InventoryEditor({ item, lastStockAt }: { item: Item | null; last
                 <span className="font-medium">Stok Saat Ini</span>
                 <span className="mt-1.5 block">
                   <IdNumberInput name="currentStock" defaultValue={item?.stock ?? 0} onValueChange={setStock} />
+                  {item ? <input type="hidden" name="stockLoaded" value={String(item.stock)} /> : null}
                 </span>
               </label>
               <label className="block text-sm">
