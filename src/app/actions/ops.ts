@@ -403,7 +403,7 @@ export async function moveInventory(formData: FormData) {
   const type = str(formData, "type") as "in" | "out" | "adjustment";
   const quantity = num(formData, "quantity");
   const note = str(formData, "note") || null;
-  if (!["in", "out", "adjustment"].includes(type) || quantity <= 0) {
+  if (!["in", "out", "adjustment"].includes(type) || quantity < 0 || (quantity === 0 && type !== "adjustment")) {
     throw new Error("Pergerakan stok tidak valid.");
   }
   const sql = getSql();
@@ -443,7 +443,7 @@ export async function saveRecipeForm(formData: FormData) {
   const [category] = await db.select().from(categories).where(eq(categories.id, categoryId)).limit(1);
   if (!category || category.catalogPack !== "fnb") throw new Error("Kategori tidak cocok.");
   const itemIds = formData.getAll("inventoryItemId").map((value) => String(value));
-  const quantities = formData.getAll("quantity").map((value) => Number(value));
+  const quantities = formData.getAll("quantity").map((value) => parseIdNumber(String(value)));
   const file = formData.get("image");
   const imageFile = file instanceof File ? file : null;
   let productId = id;
