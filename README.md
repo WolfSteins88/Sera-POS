@@ -132,14 +132,14 @@ Variabel lingkungan ada di `.env.example`. Jangan commit `.env.local`.
 
 1. Di Supabase: Project Settings → Database → Connection string. Ambil dua URL:
    - **Session pooler / direct (port 5432)** untuk `npm run db:setup` dari komputer sendiri.
-   - **Transaction pooler (port 6543)** untuk Vercel. Aplikasi otomatis mematikan prepared statement di port ini.
+   - **Session pooler (port 5432, host `aws-0-...pooler.supabase.com`)** untuk Vercel. Jangan pakai transaction pooler (6543): query bisa macet dan halaman tidak pernah selesai dimuat.
 2. Jalankan migrasi dan seed sekali dari komputer sendiri: `DATABASE_URL=<url port 5432> npm run db:setup`. Segera ganti password akun seed.
 3. Unggah gambar sekali dengan `SUPABASE_URL` dan `SUPABASE_SERVICE_ROLE_KEY` terisi: `node scripts/upload-images-to-supabase.mjs` (bucket `pos-images` dibuat otomatis).
 4. Di Vercel, set Environment Variables (Production):
 
 | Nama | Isi |
 | --- | --- |
-| `DATABASE_URL` | URL transaction pooler (port 6543) |
+| `DATABASE_URL` | URL session pooler (port 5432) |
 | `SESSION_SECRET` | String acak minimal 32 karakter (`openssl rand -base64 48`) |
 | `IMAGE_DRIVER` | `supabase` |
 | `SUPABASE_URL` | `https://<ref>.supabase.co` |
