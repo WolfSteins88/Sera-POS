@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sora POS</title>
+    <style>
+      :root { color-scheme: light; --bg: #f7f3ec; --ink: #2b1f18; --muted: #7a6a5e; --accent: #4b3427; }
+      html, body { height: 100%; margin: 0; }
+      body {
+        display: grid; place-items: center; background: var(--bg); color: var(--ink);
+        font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      main { text-align: center; max-width: 420px; padding: 24px; }
+      img { width: 88px; height: 88px; }
+      h1 { font-size: 22px; font-weight: 600; margin: 16px 0 6px; }
+      p { color: var(--muted); margin: 0; line-height: 1.5; }
+      .bar { margin: 20px auto 0; width: 160px; height: 4px; border-radius: 4px; background: #e6dccf; overflow: hidden; }
+      .bar::after { content: ""; display: block; width: 40%; height: 100%; background: var(--accent); animation: slide 1.2s ease-in-out infinite; }
+      @keyframes slide { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+      #error { display: none; margin-top: 16px; text-align: left; white-space: pre-wrap; font: 12px/1.4 ui-monospace, monospace;
+        background: #fff; border: 1px solid #e6dccf; border-radius: 10px; padding: 12px; max-height: 240px; overflow: auto; }
+      body.failed .bar { display: none; }
+      body.failed #error { display: block; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <img src="icon.svg" alt="" />
+      <h1 id="title">Memulai Sora POS…</h1>
+      <p id="subtitle">Menyiapkan database lokal. Ini hanya butuh beberapa detik.</p>
+      <div class="bar"></div>
+      <pre id="error"></pre>
+    </main>
+    <script>
+      // Called by the Tauri shell when the local server stops before it is ready.
+      window.soraFailed = function (log) {
+        document.body.classList.add("failed");
+        document.getElementById("title").textContent = "Sora POS gagal dimulai";
+        document.getElementById("subtitle").textContent = "Tutup lalu buka lagi aplikasinya. Jika masih gagal, kirim catatan di bawah ke admin.";
+        document.getElementById("error").textContent = log;
+      };
+    </script>
+  </body>
+</html>

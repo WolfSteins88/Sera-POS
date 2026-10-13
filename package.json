@@ -9,9 +9,14 @@
     "lint": "eslint",
     "db:setup": "node scripts/setup-db.mjs",
     "seed:fnb-json": "node scripts/build-fnb-seed.mjs",
-    "seed:retail-json": "node scripts/build-retail-seed.mjs"
+    "seed:retail-json": "node scripts/build-retail-seed.mjs",
+    "desktop:prepare": "node desktop/prepare.mjs",
+    "desktop:dev": "node desktop/prepare.mjs && tauri dev",
+    "desktop:build": "tauri build"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.5.9",
+    "@electric-sql/pglite-socket": "^0.2.12",
     "bcryptjs": "^3.0.3",
     "drizzle-orm": "^0.45.3",
     "framer-motion": "^13.4.4",
@@ -24,6 +29,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@tauri-apps/cli": "^2.12.2",
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20",
     "@types/react": "^19",
