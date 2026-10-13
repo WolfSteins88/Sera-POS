@@ -33,7 +33,7 @@ function stockText(value: number) {
 
 function day(iso: string | null) {
   if (!iso) return "-";
-  return new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Jakarta", day: "numeric", month: "short", year: "numeric" }).format(new Date(iso));
+  return new Intl.DateTimeFormat("id-ID", { timeZone: "Asia/Makassar", day: "numeric", month: "short", year: "numeric" }).format(new Date(iso));
 }
 
 export function InventoryEditor({ item, lastStockAt }: { item: Item | null; lastStockAt: string | null }) {
@@ -156,6 +156,7 @@ export function InventoryEditor({ item, lastStockAt }: { item: Item | null; last
                 <span className="font-medium">Stok Saat Ini</span>
                 <span className="mt-1.5 block">
                   <IdNumberInput name="currentStock" defaultValue={item?.stock ?? 0} onValueChange={setStock} />
+                  {item ? <input type="hidden" name="stockLoaded" value={String(item.stock)} /> : null}
                 </span>
               </label>
               <label className="block text-sm">
