@@ -23,6 +23,7 @@ import { getSettingsMap } from "@/lib/settings";
 import { defaultAccent, normalizeShopMode, parseAccentColor } from "@/lib/theme";
 import { DeleteDataButton } from "./DeleteDataButton";
 import { ImportBackupForm } from "./ImportBackupForm";
+import { ImportBackupPending } from "./ImportBackupPending";
 import { ModeCards } from "./ModeCards";
 
 function SectionHeading({
@@ -238,7 +239,9 @@ export default async function SettingsPage({
           </PrimaryButton>
         </div>
       </form>
-      <form id="import-backup" action={importBackup} />
+      <form id="import-backup" action={importBackup}>
+        <ImportBackupPending />
+      </form>
     </div>
   );
 }
