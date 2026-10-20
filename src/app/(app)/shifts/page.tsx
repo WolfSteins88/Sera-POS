@@ -7,6 +7,7 @@ import { getSession } from "@/lib/auth";
 import { money, num } from "@/lib/format";
 import { getOpenShift, shiftDesk, type ShiftDeskRow } from "@/server/queries";
 import { ShiftFilters } from "./ShiftFilters";
+import { FormPending } from "@/components/FormPending";
 
 const CARD = "rounded-2xl border border-line bg-surface p-4 shadow-card";
 const ROLE: Record<string, string> = { ADMIN: "Admin", MANAGER: "Manajer", CASHIER: "Kasir" };
@@ -383,6 +384,7 @@ function AdminMenu({ row, query }: { row: ShiftDeskRow; query: Query }) {
           <input type="hidden" name="id" value={row.id} />
           <button type="submit" className="w-full rounded-lg px-3 py-2 text-left text-danger hover:bg-chip">
             Hapus
+            <FormPending size="xs" />
           </button>
         </form>
       </div>

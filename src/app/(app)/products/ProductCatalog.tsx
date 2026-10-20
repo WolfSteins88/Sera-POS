@@ -8,6 +8,7 @@ import { ProductImage } from "@/components/ProductImage";
 import { toggleProductStatus } from "@/app/actions/ops";
 import { money, num } from "@/lib/format";
 import { productHref, type ProductQuery } from "./productQuery";
+import { FormPending } from "@/components/FormPending";
 
 const PILL = "h-11 shrink-0 rounded-full border border-line bg-white px-3 text-sm outline-none focus:border-accent";
 const CHIPS = ["bg-accent-soft text-accent", "bg-chip text-ink", "bg-ok-soft text-ok", "bg-warn-soft text-warn"];
@@ -68,6 +69,7 @@ function StatusToggle({ id, active }: { id: string; active: boolean }) {
         className={`relative h-6 w-11 rounded-full transition ${active ? "bg-accent" : "bg-line"}`}
       >
         <span className={`absolute top-0.5 size-5 rounded-full bg-white ${active ? "left-5" : "left-0.5"}`} />
+        <FormPending size="xs" />
       </button>
     </form>
   );

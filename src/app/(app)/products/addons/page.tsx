@@ -5,6 +5,7 @@ import { MoneyInput } from "@/components/MoneyInput";
 import { getDb } from "@/lib/db";
 import { addons } from "@/lib/schema";
 import { money, num } from "@/lib/format";
+import { FormPending } from "@/components/FormPending";
 
 export default async function AddonsPage({
   searchParams,
@@ -72,6 +73,7 @@ export default async function AddonsPage({
                         <input type="hidden" name="id" value={row.id} />
                         <button type="submit" className={dangerActionClass}>
                           Hapus
+                          <FormPending size="xs" />
                         </button>
                       </form>
                     </div>

@@ -6,6 +6,7 @@ import { ProductImage } from "@/components/ProductImage";
 import { Card, Field, PrimaryButton, ghostButtonClass, inputClass } from "@/components/ui";
 import { money } from "@/lib/format";
 import { RECEIPT_TOGGLES, receiptSectionOn } from "@/lib/receipt";
+import { ButtonLoader } from "@/components/FormPending";
 
 type PrinterRow = {
   id: string;
@@ -198,7 +199,8 @@ export function PrinterDesk({
             />
           </Field>
           <button type="button" className={`${ghostButtonClass} h-11`} disabled={testing} onClick={() => void testPrint()}>
-            {testing ? "Mengirim…" : "Uji Cetak"}
+            Uji Cetak
+            <ButtonLoader show={testing} />
           </button>
           {testMessage ? <p className={`text-sm ${testOk ? "text-ok" : "text-danger"}`}>{testMessage}</p> : null}
         </div>

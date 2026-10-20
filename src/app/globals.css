@@ -349,7 +349,10 @@ textarea {
   position: absolute;
   top: 50%;
   left: 50%;
-  animation: 2.04s linear infinite;
+  /* Longhands on purpose: the CSS minifier turns a shorthand without a name into `animation: none`. */
+  animation-duration: 2.04s;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
 }
 .sera-loader__base {
   display: grid;
@@ -723,6 +726,26 @@ textarea {
   97.415% { transform: translate(calc(var(--sera-tile) * 0.074), calc(var(--sera-tile) * -0.808)) rotate(-213.967deg); }
   99.184% { transform: translate(calc(var(--sera-tile) * -0.062), calc(var(--sera-tile) * -0.755)) rotate(-226.5deg); }
   100% { transform: translate(calc(var(--sera-tile) * -0.274), calc(var(--sera-tile) * -0.638)) rotate(-247.457deg); }
+}
+
+/* Busy buttons: the loader sits over the button and hides its label until the action finishes. */
+.sera-pending {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+button:has(> .sera-pending) {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+button:has(> .sera-pending) > :not(.sera-pending) {
+  visibility: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {

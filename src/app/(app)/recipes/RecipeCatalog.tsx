@@ -7,6 +7,7 @@ import { LayoutGrid, List, MoreHorizontal, Search } from "lucide-react";
 import { duplicateRecipe } from "@/app/actions/ops";
 import { ProductImage } from "@/components/ProductImage";
 import { money } from "@/lib/format";
+import { FormPending } from "@/components/FormPending";
 
 const PILL = "h-11 shrink-0 rounded-full border border-line bg-white px-3 text-sm outline-none focus:border-accent";
 const CHIPS = ["bg-accent-soft text-accent", "bg-chip text-ink", "bg-ok-soft text-ok", "bg-warn-soft text-warn"];
@@ -303,6 +304,7 @@ function RowMenu({ id, name }: { id: string; name: string }) {
           <input type="hidden" name="id" value={id} />
           <button type="submit" className="w-full rounded-lg px-3 py-2 text-left hover:bg-chip">
             Duplikasi
+            <FormPending size="xs" />
           </button>
         </form>
       </div>

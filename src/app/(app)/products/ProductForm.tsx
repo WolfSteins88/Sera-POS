@@ -11,6 +11,7 @@ import { ProductImage } from "@/components/ProductImage";
 import { inputClass } from "@/components/ui";
 import { money, num } from "@/lib/format";
 import { RecipeExtras } from "./RecipeExtras";
+import { FormPending, FormPendingSignal } from "@/components/FormPending";
 
 type Category = { id: string; name: string };
 type Variant = {
@@ -147,6 +148,7 @@ export function ProductForm({
           </div>
 
           <form id={FORM_ID} action={saveProduct} className={tab === "info" || tab === "settings" ? "mt-4 space-y-4" : "hidden"}>
+            <FormPendingSignal formId={FORM_ID} />
             {product ? <input type="hidden" name="id" value={product.id} /> : null}
             <input type="hidden" name="catalogPack" value={lockedPack} />
             <input type="hidden" name="status" value={active ? "active" : "inactive"} />
@@ -364,6 +366,7 @@ export function ProductForm({
                 <input type="hidden" name="next" value="desk" />
                 <button type="submit" className="inline-flex h-11 items-center rounded-full border border-danger px-4 text-sm font-semibold text-danger">
                   Hapus Produk
+                  <FormPending />
                 </button>
               </form>
             ) : (
@@ -376,6 +379,7 @@ export function ProductForm({
               {tab === "info" || tab === "settings" || tab === "variants" || tab === "addons" ? (
                 <button form={FORM_ID} type="submit" className="inline-flex h-11 items-center rounded-full bg-accent px-4 text-sm font-semibold text-white">
                   Simpan Perubahan
+                  <FormPending formId={FORM_ID} />
                 </button>
               ) : null}
             </div>

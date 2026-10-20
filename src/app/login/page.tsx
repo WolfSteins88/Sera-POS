@@ -5,6 +5,7 @@ import { Field } from "@/components/ui";
 import { getSession } from "@/lib/auth";
 import { getSettingsMap } from "@/lib/settings";
 import { normalizeShopMode } from "@/lib/theme";
+import { FormPending } from "@/components/FormPending";
 
 const COPY = {
   fnb: {
@@ -111,6 +112,7 @@ export default async function LoginPage({
               className="btn mt-1 w-full rounded-xl bg-accent text-sm font-semibold text-white"
             >
               Masuk
+              <FormPending />
             </button>
           </div>
           <p className="mt-5 text-xs text-muted">admin / manager / cashier · password123</p>

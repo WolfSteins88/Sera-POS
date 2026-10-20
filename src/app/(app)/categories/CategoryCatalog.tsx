@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { LayoutGrid, List, MoreHorizontal, Plus, Search } from "lucide-react";
 import { toggleCategoryStatus } from "@/app/actions/ops";
 import { ProductImage } from "@/components/ProductImage";
+import { FormPending } from "@/components/FormPending";
 
 const PILL = "h-11 shrink-0 rounded-full border border-line bg-white px-3 text-sm outline-none focus:border-accent";
 
@@ -55,6 +56,7 @@ function StatusToggle({ id, active }: { id: string; active: boolean }) {
         className={`relative h-6 w-11 rounded-full transition ${active ? "bg-accent" : "bg-line"}`}
       >
         <span className={`absolute top-0.5 size-5 rounded-full bg-white ${active ? "left-5" : "left-0.5"}`} />
+        <FormPending size="xs" />
       </button>
     </form>
   );
