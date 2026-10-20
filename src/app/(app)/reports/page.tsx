@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Banknote, CreditCard, Download, Info, Percent, QrCode, Receipt, ShoppingCart, TrendingDown, TrendingUp, Wallet } from "lucide-react";
+import { DataPending, DataPendingArea } from "@/components/DataPending";
 import { ProductImage } from "@/components/ProductImage";
 import { formatIdDecimal, money } from "@/lib/format";
 import { reportDesk } from "@/server/queries";
@@ -193,7 +194,7 @@ export default async function ReportsPage({
   if (desk.method) exportParams.set("method", desk.method);
 
   return (
-    <div>
+    <DataPending>
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <h1 className="text-2xl font-semibold tracking-tight">Laporan</h1>
@@ -207,12 +208,14 @@ export default async function ReportsPage({
 
       <ReportFilters tab={tab} from={desk.from} to={desk.to} cashier={desk.cashierId} method={desk.method} cashiers={desk.cashiers} />
 
-      <div className="mt-4 grid items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi icon={Banknote} label="Total Penjualan" value={money(desk.kpi.sales)} tone="bg-ok-soft text-ok" current={desk.kpi.sales} previous={desk.kpi.prevSales} />
-        <Kpi icon={ShoppingCart} label="Jumlah Transaksi" value={String(desk.kpi.trx)} tone="bg-accent-soft text-accent" current={desk.kpi.trx} previous={desk.kpi.prevTrx} />
-        <Kpi icon={Receipt} label="Rata-rata Transaksi" value={money(desk.kpi.average)} tone="bg-warn-soft text-warn" current={desk.kpi.average} previous={desk.kpi.prevAverage} />
-        <Kpi icon={Percent} label="Total Diskon" value={money(desk.kpi.discount)} tone="bg-danger/10 text-danger" current={desk.kpi.discount} previous={desk.kpi.prevDiscount} />
-      </div>
+      <DataPendingArea className="mt-4" loader={false}>
+        <div className="grid items-stretch gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <Kpi icon={Banknote} label="Total Penjualan" value={money(desk.kpi.sales)} tone="bg-ok-soft text-ok" current={desk.kpi.sales} previous={desk.kpi.prevSales} />
+          <Kpi icon={ShoppingCart} label="Jumlah Transaksi" value={String(desk.kpi.trx)} tone="bg-accent-soft text-accent" current={desk.kpi.trx} previous={desk.kpi.prevTrx} />
+          <Kpi icon={Receipt} label="Rata-rata Transaksi" value={money(desk.kpi.average)} tone="bg-warn-soft text-warn" current={desk.kpi.average} previous={desk.kpi.prevAverage} />
+          <Kpi icon={Percent} label="Total Diskon" value={money(desk.kpi.discount)} tone="bg-danger/10 text-danger" current={desk.kpi.discount} previous={desk.kpi.prevDiscount} />
+        </div>
+      </DataPendingArea>
 
       <div className="mt-4 flex gap-1 overflow-x-auto">
         {TABS.map(([key, label]) => (
@@ -228,269 +231,271 @@ export default async function ReportsPage({
         ))}
       </div>
 
-      {tab === "ringkasan" ? (
-        <div className="mt-4 space-y-4">
-          <div className="grid items-stretch gap-4 xl:grid-cols-2">
-            <section className={`${CARD} flex h-full min-w-0 flex-col`}>
-              <HourBars hours={desk.hours} />
-            </section>
-            <section className={`${CARD} flex h-full min-w-0 flex-col`}>
-              <ReportDonut slices={desk.categories} />
-            </section>
-          </div>
-          <div className="grid items-stretch gap-4 xl:grid-cols-2">
-            <section className={`${CARD} flex h-full min-w-0 flex-col`}>
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <h2 className="min-w-0 font-semibold">Produk Terlaris</h2>
-                <Link href={href(query, "produk")} className="shrink-0 text-sm font-medium text-accent">
-                  Lihat Semua
-                </Link>
-              </div>
-              {desk.products.length === 0 ? (
-                <Empty text="Belum ada produk terjual pada periode ini." />
-              ) : (
+      <DataPendingArea>
+        {tab === "ringkasan" ? (
+          <div className="mt-4 space-y-4">
+            <div className="grid items-stretch gap-4 xl:grid-cols-2">
+              <section className={`${CARD} flex h-full min-w-0 flex-col`}>
+                <HourBars hours={desk.hours} />
+              </section>
+              <section className={`${CARD} flex h-full min-w-0 flex-col`}>
+                <ReportDonut slices={desk.categories} />
+              </section>
+            </div>
+            <div className="grid items-stretch gap-4 xl:grid-cols-2">
+              <section className={`${CARD} flex h-full min-w-0 flex-col`}>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h2 className="min-w-0 font-semibold">Produk Terlaris</h2>
+                  <Link href={href(query, "produk")} className="shrink-0 text-sm font-medium text-accent">
+                    Lihat Semua
+                  </Link>
+                </div>
+                {desk.products.length === 0 ? (
+                  <Empty text="Belum ada produk terjual pada periode ini." />
+                ) : (
+                  <table className="w-full table-fixed text-left text-sm">
+                    <thead className="text-xs uppercase tracking-wide text-muted">
+                      <tr>
+                        <th className="w-8 pb-2 font-medium">#</th>
+                        <th className="pb-2 font-medium">Produk</th>
+                        <th className="w-28 pb-2 font-medium">Kategori</th>
+                        <th className="w-16 pb-2 font-medium">Terjual</th>
+                        <th className="w-36 pb-2 text-right font-medium">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {desk.products.slice(0, 5).map((row, index) => (
+                        <tr key={row.id} className="h-14 border-t border-line">
+                          <td className="pr-2 text-muted">{index + 1}</td>
+                          <td className="pr-2">
+                            <span className="flex min-w-0 items-center gap-2">
+                              <ProductImage kind="products" filename={row.image} name={row.name} className="size-9 shrink-0 rounded-xl object-cover text-xs" />
+                              <span className="truncate font-medium">{row.name}</span>
+                            </span>
+                          </td>
+                          <td className="pr-2">
+                            <span className={`inline-block max-w-full truncate rounded-full px-2.5 py-1 text-xs font-medium ${PILL_TONE[index % PILL_TONE.length]}`}>{row.category}</span>
+                          </td>
+                          <td className="pr-2">{row.qty}</td>
+                          <td className="text-right font-medium">{money(row.revenue)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
+              </section>
+              <section className={`${CARD} flex h-full min-w-0 flex-col`}>
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h2 className="min-w-0 font-semibold">Metode Pembayaran</h2>
+                  <Link href={href(query, "pembayaran")} className="shrink-0 text-sm font-medium text-accent">
+                    Lihat Semua
+                  </Link>
+                </div>
                 <table className="w-full table-fixed text-left text-sm">
                   <thead className="text-xs uppercase tracking-wide text-muted">
                     <tr>
-                      <th className="w-8 pb-2 font-medium">#</th>
+                      <th className="pb-2 font-medium">Metode</th>
+                      <th className="w-24 pb-2 font-medium">Transaksi</th>
+                      <th className="w-36 pb-2 font-medium">Total</th>
+                      <th className="w-16 pb-2 text-right font-medium">%</th>
+                    </tr>
+                  </thead>
+                    <tbody>
+                      {desk.payments.map((row) => {
+                        const Icon = PAYMENT_ICON[row.method as keyof typeof PAYMENT_ICON] ?? Wallet;
+                        const pct = paymentTotal > 0 ? Math.round((row.total / paymentTotal) * 100) : 0;
+                        return (
+                          <tr key={row.method} className="h-14 border-t border-line">
+                            <td className="pr-2">
+                              <span className="flex min-w-0 items-center gap-2">
+                                <span className={`inline-flex size-9 shrink-0 items-center justify-center rounded-full ${PAYMENT_TONE[row.method] ?? "bg-chip text-ink"}`}>
+                                  <Icon size={16} aria-hidden />
+                                </span>
+                                <span className="truncate">{PAYMENT_LABEL[row.method] ?? row.method}</span>
+                              </span>
+                            </td>
+                            <td className="pr-2">{row.trx}</td>
+                            <td className="pr-2 font-medium">{money(row.total)}</td>
+                            <td className="text-right">{pct}%</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+              </section>
+            </div>
+          </div>
+        ) : null}
+
+        {tab === "penjualan" ? (
+          <section className={`${CARD} mt-4`}>
+            {desk.sales.length === 0 ? (
+              <Empty text="Belum ada penjualan pada periode ini." />
+            ) : (
+              <>
+                <Table
+                  columns={["Tanggal", "Jumlah Transaksi", "Total Penjualan"]}
+                  rows={salesPage.map((row) => [longDate(row.date), String(row.trx), money(row.total)])}
+                />
+                <Pager query={query} tab="penjualan" page={page} total={desk.sales.length} />
+              </>
+            )}
+          </section>
+        ) : null}
+
+        {tab === "produk" ? (
+          <section className={`${CARD} mt-4`}>
+            {desk.products.length === 0 ? (
+              <Empty text="Belum ada produk terjual pada periode ini." />
+            ) : (
+              <>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[36rem] text-left text-sm">
+                  <thead className="text-xs uppercase tracking-wide text-muted">
+                    <tr>
                       <th className="pb-2 font-medium">Produk</th>
-                      <th className="w-28 pb-2 font-medium">Kategori</th>
-                      <th className="w-16 pb-2 font-medium">Terjual</th>
-                      <th className="w-36 pb-2 text-right font-medium">Total</th>
+                      <th className="pb-2 font-medium">Kategori</th>
+                      <th className="pb-2 font-medium">Terjual</th>
+                      <th className="pb-2 text-right font-medium">Total Penjualan</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {desk.products.slice(0, 5).map((row, index) => (
-                      <tr key={row.id} className="h-14 border-t border-line">
-                        <td className="pr-2 text-muted">{index + 1}</td>
-                        <td className="pr-2">
-                          <span className="flex min-w-0 items-center gap-2">
-                            <ProductImage kind="products" filename={row.image} name={row.name} className="size-9 shrink-0 rounded-xl object-cover text-xs" />
-                            <span className="truncate font-medium">{row.name}</span>
+                    {productsPage.map((row, index) => (
+                      <tr key={row.id} className="border-t border-line">
+                        <td className="py-2.5 pr-3">
+                          <span className="inline-flex items-center gap-2 font-medium">
+                            <ProductImage kind="products" filename={row.image} name={row.name} className="size-9 rounded-xl object-cover text-xs" />
+                            {row.name}
                           </span>
                         </td>
-                        <td className="pr-2">
-                          <span className={`inline-block max-w-full truncate rounded-full px-2.5 py-1 text-xs font-medium ${PILL_TONE[index % PILL_TONE.length]}`}>{row.category}</span>
+                        <td className="py-2.5 pr-3">
+                          <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${PILL_TONE[index % PILL_TONE.length]}`}>{row.category}</span>
                         </td>
-                        <td className="pr-2">{row.qty}</td>
-                        <td className="text-right font-medium">{money(row.revenue)}</td>
+                        <td className="py-2.5 pr-3">{row.qty}</td>
+                        <td className="py-2.5 text-right font-medium">{money(row.revenue)}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
-              )}
-            </section>
-            <section className={`${CARD} flex h-full min-w-0 flex-col`}>
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <h2 className="min-w-0 font-semibold">Metode Pembayaran</h2>
-                <Link href={href(query, "pembayaran")} className="shrink-0 text-sm font-medium text-accent">
-                  Lihat Semua
-                </Link>
               </div>
-              <table className="w-full table-fixed text-left text-sm">
-                <thead className="text-xs uppercase tracking-wide text-muted">
-                  <tr>
-                    <th className="pb-2 font-medium">Metode</th>
-                    <th className="w-24 pb-2 font-medium">Transaksi</th>
-                    <th className="w-36 pb-2 font-medium">Total</th>
-                    <th className="w-16 pb-2 text-right font-medium">%</th>
-                  </tr>
-                </thead>
+              <Pager query={query} tab="produk" page={page} total={desk.products.length} />
+              </>
+            )}
+          </section>
+        ) : null}
+
+        {tab === "kasir" ? (
+          <section className={`${CARD} mt-4`}>
+            {desk.cashierRows.length === 0 ? (
+              <Empty text="Belum ada penjualan kasir pada periode ini." />
+            ) : (
+              <Table
+                columns={["Kasir", "Jumlah Transaksi", "Total Penjualan"]}
+                rows={desk.cashierRows.map((row) => [row.name, String(row.trx), money(row.total)])}
+              />
+            )}
+          </section>
+        ) : null}
+
+        {tab === "pembayaran" ? (
+          <section className={`${CARD} mt-4`}>
+            <Table
+              columns={["Metode", "Jumlah Transaksi", "Total", "Persentase"]}
+              rows={desk.payments.map((row) => [
+                PAYMENT_LABEL[row.method] ?? row.method,
+                String(row.trx),
+                money(row.total),
+                `${paymentTotal > 0 ? Math.round((row.total / paymentTotal) * 100) : 0}%`,
+              ])}
+            />
+          </section>
+        ) : null}
+
+        {tab === "pajak" ? (
+          <section className={`${CARD} mt-4`}>
+            {desk.tax.length === 0 ? (
+              <Empty text="Belum ada pajak atau biaya pada periode ini." />
+            ) : (
+              <>
+                <Table
+                  columns={["Tanggal", "Pajak", "Biaya Layanan", "Total"]}
+                  rows={taxPage.map((row) => [longDate(row.date), money(row.tax), money(row.service), money(row.tax + row.service)])}
+                />
+                <Pager query={query} tab="pajak" page={page} total={desk.tax.length} />
+              </>
+            )}
+          </section>
+        ) : null}
+
+        {tab === "shift" ? (
+          <section className={`${CARD} mt-4`}>
+            {desk.shifts.length === 0 ? (
+              <Empty text="Belum ada shift pada periode ini." />
+            ) : (
+              <>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[48rem] text-left text-sm">
+                  <thead className="text-xs uppercase tracking-wide text-muted">
+                    <tr>
+                      {["Kasir", "Dibuka", "Ditutup", "Modal Awal", "Cash Sales", "Aktual", "Selisih"].map((column) => (
+                        <th key={column} className="pb-2 pr-3 font-medium">
+                          {column}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
                   <tbody>
-                    {desk.payments.map((row) => {
-                      const Icon = PAYMENT_ICON[row.method as keyof typeof PAYMENT_ICON] ?? Wallet;
-                      const pct = paymentTotal > 0 ? Math.round((row.total / paymentTotal) * 100) : 0;
-                      return (
-                        <tr key={row.method} className="h-14 border-t border-line">
-                          <td className="pr-2">
-                            <span className="flex min-w-0 items-center gap-2">
-                              <span className={`inline-flex size-9 shrink-0 items-center justify-center rounded-full ${PAYMENT_TONE[row.method] ?? "bg-chip text-ink"}`}>
-                                <Icon size={16} aria-hidden />
-                              </span>
-                              <span className="truncate">{PAYMENT_LABEL[row.method] ?? row.method}</span>
-                            </span>
-                          </td>
-                          <td className="pr-2">{row.trx}</td>
-                          <td className="pr-2 font-medium">{money(row.total)}</td>
-                          <td className="text-right">{pct}%</td>
-                        </tr>
-                      );
-                    })}
+                    {shiftsPage.map((row) => (
+                      <tr key={`${row.cashier}-${row.openingAt}`} className="border-t border-line">
+                        <td className="py-2.5 pr-3 font-medium">{row.cashier}</td>
+                        <td className="py-2.5 pr-3">{clock(row.openingAt)}</td>
+                        <td className="py-2.5 pr-3">{row.closingAt ? clock(row.closingAt) : "-"}</td>
+                        <td className="py-2.5 pr-3">{money(row.openingCash)}</td>
+                        <td className="py-2.5 pr-3">{money(row.cashSales)}</td>
+                        <td className="py-2.5 pr-3">{row.closingCash == null ? "-" : money(row.closingCash)}</td>
+                        <td className={`py-2.5 pr-3 ${row.difference != null && row.difference < 0 ? "text-danger" : ""}`}>
+                          {row.difference == null ? "-" : money(row.difference)}
+                        </td>
+                      </tr>
+                    ))}
                   </tbody>
                 </table>
-            </section>
-          </div>
-        </div>
-      ) : null}
+              </div>
+              <Pager query={query} tab="shift" page={page} total={desk.shifts.length} />
+              </>
+            )}
+          </section>
+        ) : null}
 
-      {tab === "penjualan" ? (
-        <section className={`${CARD} mt-4`}>
-          {desk.sales.length === 0 ? (
-            <Empty text="Belum ada penjualan pada periode ini." />
-          ) : (
-            <>
-              <Table
-                columns={["Tanggal", "Jumlah Transaksi", "Total Penjualan"]}
-                rows={salesPage.map((row) => [longDate(row.date), String(row.trx), money(row.total)])}
-              />
-              <Pager query={query} tab="penjualan" page={page} total={desk.sales.length} />
-            </>
-          )}
-        </section>
-      ) : null}
-
-      {tab === "produk" ? (
-        <section className={`${CARD} mt-4`}>
-          {desk.products.length === 0 ? (
-            <Empty text="Belum ada produk terjual pada periode ini." />
-          ) : (
-            <>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[36rem] text-left text-sm">
-                <thead className="text-xs uppercase tracking-wide text-muted">
-                  <tr>
-                    <th className="pb-2 font-medium">Produk</th>
-                    <th className="pb-2 font-medium">Kategori</th>
-                    <th className="pb-2 font-medium">Terjual</th>
-                    <th className="pb-2 text-right font-medium">Total Penjualan</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {productsPage.map((row, index) => (
-                    <tr key={row.id} className="border-t border-line">
-                      <td className="py-2.5 pr-3">
-                        <span className="inline-flex items-center gap-2 font-medium">
-                          <ProductImage kind="products" filename={row.image} name={row.name} className="size-9 rounded-xl object-cover text-xs" />
-                          {row.name}
-                        </span>
-                      </td>
-                      <td className="py-2.5 pr-3">
-                        <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${PILL_TONE[index % PILL_TONE.length]}`}>{row.category}</span>
-                      </td>
-                      <td className="py-2.5 pr-3">{row.qty}</td>
-                      <td className="py-2.5 text-right font-medium">{money(row.revenue)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <Pager query={query} tab="produk" page={page} total={desk.products.length} />
-            </>
-          )}
-        </section>
-      ) : null}
-
-      {tab === "kasir" ? (
-        <section className={`${CARD} mt-4`}>
-          {desk.cashierRows.length === 0 ? (
-            <Empty text="Belum ada penjualan kasir pada periode ini." />
-          ) : (
-            <Table
-              columns={["Kasir", "Jumlah Transaksi", "Total Penjualan"]}
-              rows={desk.cashierRows.map((row) => [row.name, String(row.trx), money(row.total)])}
-            />
-          )}
-        </section>
-      ) : null}
-
-      {tab === "pembayaran" ? (
-        <section className={`${CARD} mt-4`}>
-          <Table
-            columns={["Metode", "Jumlah Transaksi", "Total", "Persentase"]}
-            rows={desk.payments.map((row) => [
-              PAYMENT_LABEL[row.method] ?? row.method,
-              String(row.trx),
-              money(row.total),
-              `${paymentTotal > 0 ? Math.round((row.total / paymentTotal) * 100) : 0}%`,
-            ])}
-          />
-        </section>
-      ) : null}
-
-      {tab === "pajak" ? (
-        <section className={`${CARD} mt-4`}>
-          {desk.tax.length === 0 ? (
-            <Empty text="Belum ada pajak atau biaya pada periode ini." />
-          ) : (
-            <>
-              <Table
-                columns={["Tanggal", "Pajak", "Biaya Layanan", "Total"]}
-                rows={taxPage.map((row) => [longDate(row.date), money(row.tax), money(row.service), money(row.tax + row.service)])}
-              />
-              <Pager query={query} tab="pajak" page={page} total={desk.tax.length} />
-            </>
-          )}
-        </section>
-      ) : null}
-
-      {tab === "shift" ? (
-        <section className={`${CARD} mt-4`}>
-          {desk.shifts.length === 0 ? (
-            <Empty text="Belum ada shift pada periode ini." />
-          ) : (
-            <>
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[48rem] text-left text-sm">
-                <thead className="text-xs uppercase tracking-wide text-muted">
-                  <tr>
-                    {["Kasir", "Dibuka", "Ditutup", "Modal Awal", "Cash Sales", "Aktual", "Selisih"].map((column) => (
-                      <th key={column} className="pb-2 pr-3 font-medium">
-                        {column}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {shiftsPage.map((row) => (
-                    <tr key={`${row.cashier}-${row.openingAt}`} className="border-t border-line">
-                      <td className="py-2.5 pr-3 font-medium">{row.cashier}</td>
-                      <td className="py-2.5 pr-3">{clock(row.openingAt)}</td>
-                      <td className="py-2.5 pr-3">{row.closingAt ? clock(row.closingAt) : "-"}</td>
-                      <td className="py-2.5 pr-3">{money(row.openingCash)}</td>
-                      <td className="py-2.5 pr-3">{money(row.cashSales)}</td>
-                      <td className="py-2.5 pr-3">{row.closingCash == null ? "-" : money(row.closingCash)}</td>
-                      <td className={`py-2.5 pr-3 ${row.difference != null && row.difference < 0 ? "text-danger" : ""}`}>
-                        {row.difference == null ? "-" : money(row.difference)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <Pager query={query} tab="shift" page={page} total={desk.shifts.length} />
-            </>
-          )}
-        </section>
-      ) : null}
-
-      {tab === "stok" ? (
-        <section className={`${CARD} mt-4`}>
-          {desk.stock.length === 0 ? (
-            <Empty text="Belum ada stok." />
-          ) : (
-            <>
-              <Table
-                columns={["Jenis", "Nama", "SKU", "Stok", "Minimum", "Nilai"]}
-                rows={stockPage.map((row) => [
-                  row.kind,
-                  row.name,
-                  row.sku,
-                  formatIdDecimal(row.stock),
-                  formatIdDecimal(row.minimum),
-                  money(row.value),
-                ])}
-              />
-              <Pager query={query} tab="stok" page={page} total={desk.stock.length} />
-            </>
-          )}
-        </section>
-      ) : null}
+        {tab === "stok" ? (
+          <section className={`${CARD} mt-4`}>
+            {desk.stock.length === 0 ? (
+              <Empty text="Belum ada stok." />
+            ) : (
+              <>
+                <Table
+                  columns={["Jenis", "Nama", "SKU", "Stok", "Minimum", "Nilai"]}
+                  rows={stockPage.map((row) => [
+                    row.kind,
+                    row.name,
+                    row.sku,
+                    formatIdDecimal(row.stock),
+                    formatIdDecimal(row.minimum),
+                    money(row.value),
+                  ])}
+                />
+                <Pager query={query} tab="stok" page={page} total={desk.stock.length} />
+              </>
+            )}
+          </section>
+        ) : null}
+      </DataPendingArea>
 
       <p className="mt-4 inline-flex items-center gap-2 text-sm text-muted">
         <Info size={16} aria-hidden />
         Data pada laporan ini diperbarui sesuai transaksi yang masuk.
       </p>
-    </div>
+    </DataPending>
   );
 }
 

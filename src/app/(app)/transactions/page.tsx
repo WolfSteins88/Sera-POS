@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { Ban, Receipt, ShoppingCart, TrendingDown, TrendingUp, Wallet, X } from "lucide-react";
+import { DataPending, DataPendingArea } from "@/components/DataPending";
 import { ProductImage } from "@/components/ProductImage";
 import { money, num } from "@/lib/format";
 import { getSettingsMap } from "@/lib/settings";
@@ -102,7 +103,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
   };
 
   return (
-    <div>
+    <DataPending>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Transaksi</h1>
@@ -141,72 +142,74 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
             cashiers={desk.cashiers}
           />
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[46rem] text-left text-sm">
-              <thead className="text-xs uppercase tracking-wide text-muted">
-                <tr>
-                  <th className="pb-2 font-medium" />
-                  <th className="pb-2 font-medium">No. transaksi</th>
-                  <th className="pb-2 font-medium">Tanggal</th>
-                  <th className="pb-2 font-medium">Kasir</th>
-                  <th className="pb-2 font-medium">Item</th>
-                  <th className="pb-2 font-medium">Total</th>
-                  <th className="pb-2 font-medium">Bayar</th>
-                  <th className="pb-2 font-medium">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {desk.rows.length === 0 ? (
+          <DataPendingArea>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[46rem] text-left text-sm">
+                <thead className="text-xs uppercase tracking-wide text-muted">
                   <tr>
-                    <td colSpan={8} className="py-8 text-center text-muted">
-                      Tidak ada transaksi pada filter ini.
-                    </td>
+                    <th className="pb-2 font-medium" />
+                    <th className="pb-2 font-medium">No. transaksi</th>
+                    <th className="pb-2 font-medium">Tanggal</th>
+                    <th className="pb-2 font-medium">Kasir</th>
+                    <th className="pb-2 font-medium">Item</th>
+                    <th className="pb-2 font-medium">Total</th>
+                    <th className="pb-2 font-medium">Bayar</th>
+                    <th className="pb-2 font-medium">Status</th>
                   </tr>
-                ) : null}
-                {desk.rows.map((row) => {
-                  const selected = row.id === params.id;
-                  const method = String(row.payment_method || "");
-                  return (
-                    <tr key={row.id} className={`border-t border-line ${selected ? "bg-chip" : ""}`}>
-                      <td className="py-2">
-                        <Link
-                          href={href(filters, { id: row.id })}
-                          aria-label={`Detail ${row.transaction_number}`}
-                          className="inline-flex size-9 items-center justify-center"
-                        >
-                          <span
-                            className={`inline-flex size-4 items-center justify-center rounded border ${selected ? "border-accent bg-accent text-white" : "border-line"}`}
-                            aria-hidden
-                          >
-                            {selected ? "✓" : ""}
-                          </span>
-                        </Link>
-                      </td>
-                      <td className="py-2 font-medium">
-                        <Link href={href(filters, { id: row.id })}>{row.transaction_number}</Link>
-                      </td>
-                      <td className="py-2 text-muted">{formatWhen(row.created_at)}</td>
-                      <td className="py-2">{row.cashier_name}</td>
-                      <td className="py-2">{row.item_count}</td>
-                      <td className="py-2">{money(num(row.total), currency)}</td>
-                      <td className="py-2">
-                        <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${PAYMENT_CLASS[method] ?? "bg-chip text-ink"}`}>
-                          {PAYMENT_LABEL[method] ?? (method || "-")}
-                        </span>
-                      </td>
-                      <td className="py-2">
-                        <span
-                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${row.status === "cancelled" ? "bg-red-50 text-danger" : "bg-ok-soft text-ok"}`}
-                        >
-                          {row.status === "cancelled" ? "Refund" : "Selesai"}
-                        </span>
+                </thead>
+                <tbody>
+                  {desk.rows.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-muted">
+                        Tidak ada transaksi pada filter ini.
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                  ) : null}
+                  {desk.rows.map((row) => {
+                    const selected = row.id === params.id;
+                    const method = String(row.payment_method || "");
+                    return (
+                      <tr key={row.id} className={`border-t border-line ${selected ? "bg-chip" : ""}`}>
+                        <td className="py-2">
+                          <Link
+                            href={href(filters, { id: row.id })}
+                            aria-label={`Detail ${row.transaction_number}`}
+                            className="inline-flex size-9 items-center justify-center"
+                          >
+                            <span
+                              className={`inline-flex size-4 items-center justify-center rounded border ${selected ? "border-accent bg-accent text-white" : "border-line"}`}
+                              aria-hidden
+                            >
+                              {selected ? "✓" : ""}
+                            </span>
+                          </Link>
+                        </td>
+                        <td className="py-2 font-medium">
+                          <Link href={href(filters, { id: row.id })}>{row.transaction_number}</Link>
+                        </td>
+                        <td className="py-2 text-muted">{formatWhen(row.created_at)}</td>
+                        <td className="py-2">{row.cashier_name}</td>
+                        <td className="py-2">{row.item_count}</td>
+                        <td className="py-2">{money(num(row.total), currency)}</td>
+                        <td className="py-2">
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${PAYMENT_CLASS[method] ?? "bg-chip text-ink"}`}>
+                            {PAYMENT_LABEL[method] ?? (method || "-")}
+                          </span>
+                        </td>
+                        <td className="py-2">
+                          <span
+                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${row.status === "cancelled" ? "bg-red-50 text-danger" : "bg-ok-soft text-ok"}`}
+                          >
+                            {row.status === "cancelled" ? "Refund" : "Selesai"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </DataPendingArea>
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-muted">
             <p>
@@ -366,7 +369,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
           </aside>
         ) : null}
       </div>
-    </div>
+    </DataPending>
   );
 }
 
