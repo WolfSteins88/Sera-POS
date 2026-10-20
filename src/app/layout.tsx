@@ -11,7 +11,7 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "UMKM POS",
+  title: "Sera POS",
   description: "Kasir toko lokal",
 };
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-28T05:22:49.479Z",
+  "generatedAt": "2026-10-20T04:09:22.786Z",
   "kind": "sora-pos-backup",
   "users": [
     {
@@ -780,7 +780,7 @@
     {
       "id": "6a82b104-1064-5a2e-99b6-0c1a0190316a",
       "setting_key": "shop_name",
-      "setting_value": "Sora Coffee"
+      "setting_value": "Sera Coffee"
     },
     {
       "id": "c97340f9-80dd-553e-836a-ac7c6ea781ac",
@@ -795,7 +795,7 @@
     {
       "id": "8db62621-ff26-5cd0-94bc-d3efb2009257",
       "setting_key": "shop_email",
-      "setting_value": "hello@soracoffee.local"
+      "setting_value": "hello@seracoffee.local"
     },
     {
       "id": "987158ff-4fc4-5c27-bb31-74c6913b6b5c",

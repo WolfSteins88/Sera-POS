@@ -15,7 +15,7 @@ export async function GET() {
     return new NextResponse(body, {
       headers: {
         "Content-Type": "application/json",
-        "Content-Disposition": 'attachment; filename="sora-pos-fnb-demo-2026-09.json"',
+        "Content-Disposition": 'attachment; filename="sera-pos-fnb-demo-2026-09.json"',
       },
     });
   } catch {

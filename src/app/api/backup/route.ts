@@ -13,7 +13,7 @@ export async function GET() {
   return new NextResponse(JSON.stringify(dump, null, 2), {
     headers: {
       "Content-Type": "application/json",
-      "Content-Disposition": `attachment; filename="sora-pos-backup-${day}.json"`,
+      "Content-Disposition": `attachment; filename="sera-pos-backup-${day}.json"`,
     },
   });
 }

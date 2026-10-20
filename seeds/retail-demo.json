@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-23T11:32:36.412Z",
+  "generatedAt": "2026-10-20T04:09:22.609Z",
   "kind": "sora-pos-backup",
   "users": [
     {
@@ -331,7 +331,7 @@
   "printers": [
     {
       "id": "422c8656-5e89-549c-b288-853307902503",
-      "name": "Kasir Sora Mart",
+      "name": "Kasir Sera Mart",
       "type": "thermal",
       "paper_size": "80mm",
       "connection_mode": "web_bluetooth",
@@ -349,7 +349,7 @@
     {
       "id": "bbd9228a-dcef-52c3-a3b7-0e60f4cbae83",
       "setting_key": "shop_name",
-      "setting_value": "Sora Mart"
+      "setting_value": "Sera Mart"
     },
     {
       "id": "10df1729-a8b5-5856-8df1-212a33e3cfe9",
@@ -364,7 +364,7 @@
     {
       "id": "4831b5d7-33df-57e8-857a-7619532217da",
       "setting_key": "shop_email",
-      "setting_value": "halo@soramart.local"
+      "setting_value": "halo@seramart.local"
     },
     {
       "id": "0fa5956a-1b97-56bf-9140-3cee265ac6e7",
@@ -374,7 +374,7 @@
     {
       "id": "cf014959-f6c8-5429-8b43-b685df0b8233",
       "setting_key": "receipt_footer",
-      "setting_value": "Belanja hemat di Sora Mart"
+      "setting_value": "Belanja hemat di Sera Mart"
     },
     {
       "id": "9f6ec908-d846-5b5b-a62e-709e3a3bae5d",

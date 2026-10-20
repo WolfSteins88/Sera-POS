@@ -258,10 +258,10 @@ const printers = [
 ];
 
 const settings = [
-  ["shop_name", "Sora Coffee"],
+  ["shop_name", "Sera Coffee"],
   ["shop_address", "Jl. Merdeka No. 10, Jakarta"],
   ["shop_phone", "0812-3456-7890"],
-  ["shop_email", "hello@soracoffee.local"],
+  ["shop_email", "hello@seracoffee.local"],
   ["shop_logo", ""],
   ["receipt_footer", "Terima kasih, sampai jumpa lagi!"],
   ["tax_percent", "0"],

@@ -96,7 +96,7 @@ const prodByKey = Object.fromEntries(productsMeta.map((p) => [p.key, p]));
 const printers = [
   {
     id: PRINTER,
-    name: "Kasir Sora Mart",
+    name: "Kasir Sera Mart",
     type: "thermal",
     paper_size: "80mm",
     connection_mode: "web_bluetooth",
@@ -112,12 +112,12 @@ const printers = [
 ];
 
 const settings = [
-  ["shop_name", "Sora Mart"],
+  ["shop_name", "Sera Mart"],
   ["shop_address", "Jl. Sudirman No. 88, Bandung"],
   ["shop_phone", "0821-9876-5432"],
-  ["shop_email", "halo@soramart.local"],
+  ["shop_email", "halo@seramart.local"],
   ["shop_logo", ""],
-  ["receipt_footer", "Belanja hemat di Sora Mart"],
+  ["receipt_footer", "Belanja hemat di Sera Mart"],
   ["tax_percent", "0"],
   ["service_charge_percent", "0"],
   ["currency", "Rp"],

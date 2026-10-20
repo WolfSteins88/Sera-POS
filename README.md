@@ -1,6 +1,6 @@
-# Sora POS
+# Sera POS
 
-Sora POS adalah aplikasi kasir untuk **satu toko**: coffee shop (F&B) atau toko ritel. Aplikasi dijalankan di satu PC. Buka Chrome atau Edge ke `http://localhost:3000`. Penjualan tetap berjalan jika internet terputus.
+Sera POS adalah aplikasi kasir untuk **satu toko**: coffee shop (F&B) atau toko ritel. Aplikasi dijalankan di satu PC. Buka Chrome atau Edge ke `http://localhost:3000`. Penjualan tetap berjalan jika internet terputus.
 
 Mode toko: **F&B** atau **Retail**. Nilai lama `mixed` di database dibaca sebagai F&B.
 
