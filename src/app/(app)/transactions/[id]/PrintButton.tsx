@@ -22,7 +22,7 @@ function receiptText(trx: Trx, settings: Record<string, string>) {
   if (settings.shop_phone) rows.push(settings.shop_phone);
   rows.push(line());
   if (receiptSectionOn(settings, "receipt_show_number")) rows.push(trx.transaction_number);
-  if (receiptSectionOn(settings, "receipt_show_time")) rows.push(new Date(trx.created_at).toLocaleString("id-ID"));
+  if (receiptSectionOn(settings, "receipt_show_time")) rows.push(new Date(trx.created_at).toLocaleString("id-ID", { timeZone: "Asia/Makassar" }));
   if (receiptSectionOn(settings, "receipt_show_cashier") && trx.cashier_name) rows.push(trx.cashier_name);
   if (receiptSectionOn(settings, "receipt_show_items")) {
     rows.push(line());

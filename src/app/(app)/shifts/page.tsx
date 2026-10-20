@@ -33,7 +33,7 @@ function href(current: Query, patch: Partial<Query>) {
 
 function clock(value: string) {
   return new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Jakarta",
+    timeZone: "Asia/Makassar",
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
@@ -42,7 +42,7 @@ function clock(value: string) {
 
 function longDate(value: string) {
   return new Intl.DateTimeFormat("id-ID", {
-    timeZone: "Asia/Jakarta",
+    timeZone: "Asia/Makassar",
     weekday: "long",
     day: "numeric",
     month: "short",

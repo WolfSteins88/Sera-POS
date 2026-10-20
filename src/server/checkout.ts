@@ -37,13 +37,13 @@ function n(v: string | number | null | undefined) {
 async function nextTransactionNumber(sql: SqlClient) {
   const [row] = await sql<{ last_seq: number }[]>`
     INSERT INTO transaction_counters (day, last_seq)
-    VALUES ((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date, 1)
+    VALUES ((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date, 1)
     ON CONFLICT (day) DO UPDATE
       SET last_seq = transaction_counters.last_seq + 1
     RETURNING last_seq, day
   `;
   const [dayRow] = await sql<{ day: string }[]>`
-    SELECT to_char((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Jakarta')::date, 'YYYYMMDD') AS day
+    SELECT to_char((CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Makassar')::date, 'YYYYMMDD') AS day
   `;
   return `CS-${dayRow.day}-${String(row.last_seq).padStart(5, "0")}`;
 }
@@ -124,6 +124,30 @@ async function deductRecipe(
   }
 }
 
+async function restoreRecipeFromMovements(sql: SqlClient, reference: string, userId: string) {
+  const moved = await sql<{ inventory_item_id: string; quantity: string }[]>`
+    SELECT inventory_item_id, SUM(quantity)::text AS quantity
+    FROM inventory_movements
+    WHERE reference = ${reference} AND type = 'sale'
+    GROUP BY inventory_item_id
+  `;
+  for (const row of moved) {
+    const [inv] = await sql<{ id: string; current_stock: string }[]>`
+      SELECT id, current_stock::text FROM inventory_items WHERE id = ${row.inventory_item_id} FOR UPDATE
+    `;
+    if (!inv) continue;
+    const before = n(inv.current_stock);
+    const after = before + n(row.quantity);
+    await sql`UPDATE inventory_items SET current_stock = ${after}, updated_at = NOW() WHERE id = ${inv.id}`;
+    await sql`
+      INSERT INTO inventory_movements
+        (inventory_item_id, type, quantity, stock_before, stock_after, reference, note, user_id)
+      VALUES (${inv.id}, 'adjustment', ${n(row.quantity)}, ${before}, ${after}, ${reference}, 'Pengembalian stok dari transaksi dibatalkan', ${userId})
+    `;
+  }
+  return moved.length > 0;
+}
+
 async function restoreRecipe(
   sql: SqlClient,
   productId: string,
@@ -162,7 +186,7 @@ export async function checkoutTransaction(userId: string, payload: CheckoutPaylo
   const sql = getSql();
   return sql.begin(async (tx) => {
     const [shift] = await tx<{ id: string }[]>`
-      SELECT id FROM shifts WHERE user_id = ${userId} AND status = 'open' LIMIT 1
+      SELECT id FROM shifts WHERE user_id = ${userId} AND status = 'open' LIMIT 1 FOR UPDATE
     `;
     if (!shift) {
       throw new Error("Shift belum dibuka. Buka shift sebelum checkout.");
@@ -204,7 +228,9 @@ export async function checkoutTransaction(userId: string, payload: CheckoutPaylo
         FROM products WHERE id = ${raw.productId} AND status = 'active' LIMIT 1
       `;
       if (!product) throw new Error("Produk tidak ditemukan atau tidak aktif.");
-      if (product.stock_status === "sold_out") {
+      // With negative stock allowed, goods that only ran out (not marked sold out by hand) can still be sold.
+      const ranOut = product.kind === "goods" && n(product.current_stock) <= 0;
+      if (product.stock_status === "sold_out" && !(allowNegative && ranOut)) {
         throw new Error(`Produk ${product.name} sedang habis.`);
       }
 
@@ -358,22 +384,42 @@ export async function checkoutTransaction(userId: string, payload: CheckoutPaylo
   });
 }
 
-export async function cancelTransaction(id: string, userId: string | null) {
+export async function cancelTransaction(
+  id: string,
+  actor: { id: string; role: "ADMIN" | "MANAGER" | "CASHIER" },
+) {
   const sql = getSql();
   return sql.begin(async (tx) => {
     const [trx] = await tx<
-      { id: string; status: string; transaction_number: string; shift_id: string | null; total: string }[]
+      {
+        id: string;
+        status: string;
+        transaction_number: string;
+        shift_id: string | null;
+        user_id: string;
+        total: string;
+        shift_status: string | null;
+      }[]
     >`
-      SELECT id, status, transaction_number, shift_id, total::text
-      FROM transactions WHERE id = ${id} FOR UPDATE
+      SELECT t.id, t.status, t.transaction_number, t.shift_id, t.user_id, t.total::text, s.status::text AS shift_status
+      FROM transactions t
+      LEFT JOIN shifts s ON s.id = t.shift_id
+      WHERE t.id = ${id}
+      FOR UPDATE OF t
     `;
     if (!trx || trx.status === "cancelled") {
       throw new Error("Transaksi tidak ditemukan atau sudah dibatalkan.");
+    }
+    // Cashiers may only refund their own sales while that shift is still open; older sales need a manager.
+    if (actor.role === "CASHIER" && (trx.user_id !== actor.id || trx.shift_status !== "open")) {
+      throw new Error("Hanya manajer yang bisa membatalkan transaksi kasir lain atau dari shift yang sudah ditutup.");
     }
 
     const items = await tx<{ product_id: string; quantity: number }[]>`
       SELECT product_id, quantity FROM transaction_items WHERE transaction_id = ${id}
     `;
+    // Put back exactly what the sale deducted, not what today's recipe would use.
+    const restoredFromLog = await restoreRecipeFromMovements(tx, trx.transaction_number, actor.id);
     for (const item of items) {
       const [product] = await tx<{ kind: "goods" | "recipe" }[]>`
         SELECT kind FROM products WHERE id = ${item.product_id}
@@ -381,21 +427,35 @@ export async function cancelTransaction(id: string, userId: string | null) {
       if (!product) continue;
       if (product.kind === "goods") {
         await restoreGoods(tx, item.product_id, item.quantity);
-      } else {
-        await restoreRecipe(tx, item.product_id, item.quantity, trx.transaction_number, userId);
+      } else if (!restoredFromLog) {
+        await restoreRecipe(tx, item.product_id, item.quantity, trx.transaction_number, actor.id);
       }
     }
 
     const [pay] = await tx<{ method: string }[]>`
       SELECT method FROM payments WHERE transaction_id = ${id} LIMIT 1
     `;
-    if (pay?.method === "cash" && trx.shift_id) {
-      await tx`
-        UPDATE shifts SET cash_sales = GREATEST(0, cash_sales - ${n(trx.total)})
-        WHERE id = ${trx.shift_id}
-      `;
+    if (pay?.method === "cash") {
+      // A closed shift's cash count is final; take the refund out of the drawer that is open now.
+      let shiftId = trx.shift_status === "open" ? trx.shift_id : null;
+      if (!shiftId) {
+        const [open] = await tx<{ id: string }[]>`
+          SELECT id FROM shifts WHERE user_id = ${actor.id} AND status = 'open' LIMIT 1
+        `;
+        shiftId = open?.id ?? null;
+      }
+      if (shiftId) {
+        await tx`
+          UPDATE shifts SET cash_sales = cash_sales - ${n(trx.total)}
+          WHERE id = ${shiftId}
+        `;
+      }
     }
 
     await tx`UPDATE transactions SET status = 'cancelled' WHERE id = ${id}`;
+    await tx`
+      INSERT INTO activity_logs (user_id, action, description)
+      VALUES (${actor.id}, 'transaction_cancel', ${`Batal ${trx.transaction_number} (total ${n(trx.total)})`})
+    `;
   });
 }

@@ -1,7 +1,13 @@
 const COOKIE = "umkm_pos_session";
 
+const MAX_AGE_SECONDS = 60 * 60 * 16;
+
 function secret() {
-  return process.env.SESSION_SECRET || "dev-only-change-me-please-32chars!!";
+  const value = process.env.SESSION_SECRET;
+  if (value) return value;
+  // The fallback is public in the repo, so anyone could mint an admin cookie with it.
+  if (process.env.NODE_ENV === "production") throw new Error("SESSION_SECRET wajib diisi di produksi.");
+  return "dev-only-change-me-please-32chars!!";
 }
 
 function b64url(bytes: ArrayBuffer | Uint8Array) {
@@ -44,10 +50,13 @@ export type SessionUser = {
   name: string;
   username: string;
   role: "ADMIN" | "MANAGER" | "CASHIER";
+  /** Set after an admin reset; the user has to choose a new password before doing anything else. */
+  mustChangePassword?: boolean;
 };
 
 export async function encodeSession(user: SessionUser) {
-  const payload = b64url(new TextEncoder().encode(JSON.stringify(user)));
+  const exp = Math.floor(Date.now() / 1000) + MAX_AGE_SECONDS;
+  const payload = b64url(new TextEncoder().encode(JSON.stringify({ ...user, exp })));
   return `${payload}.${await sign(payload)}`;
 }
 
@@ -59,12 +68,13 @@ export async function decodeSession(token: string | undefined): Promise<SessionU
   if (!safeEqual(sig, expected)) return null;
   try {
     const json = new TextDecoder().decode(fromB64url(payload));
-    const user = JSON.parse(json) as SessionUser;
+    const { exp, ...user } = JSON.parse(json) as SessionUser & { exp?: number };
     if (!user?.id || !user.role) return null;
+    if (!exp || exp * 1000 < Date.now()) return null;
     return user;
   } catch {
     return null;
   }
 }
 
-export { COOKIE };
+export { COOKIE, MAX_AGE_SECONDS };

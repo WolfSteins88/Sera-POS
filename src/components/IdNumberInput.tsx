@@ -28,6 +28,13 @@ function caretAfterDigits(formatted: string, digitCount: number) {
   return formatted.length;
 }
 
+/** Defaults come from the database ("12.000" for NUMERIC(12,3)), so read them as plain decimals, not "12 thousand". */
+function toNumber(value: number | string) {
+  if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+  const n = Number(value);
+  return Number.isFinite(n) ? n : parseIdNumber(value);
+}
+
 export function IdNumberInput({
   name,
   defaultValue = 0,
@@ -45,7 +52,7 @@ export function IdNumberInput({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [text, setText] = useState(() => {
-    const n = parseIdNumber(defaultValue);
+    const n = toNumber(defaultValue);
     return n ? formatIdDecimal(n) : "";
   });
   const numeric = parseIdNumber(text);
@@ -65,7 +72,7 @@ export function IdNumberInput({
 
   return (
     <>
-      {name ? <input type="hidden" name={name} value={String(numeric)} /> : null}
+      {name ? <input type="hidden" name={name} value={String(numeric).replace(".", ",")} /> : null}
       <input
         ref={inputRef}
         id={id}

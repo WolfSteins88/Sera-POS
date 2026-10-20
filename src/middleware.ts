@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { can, type ModuleKey } from "@/lib/rbac";
 import { decodeSession } from "@/lib/session";
 
 const PUBLIC = ["/login"];
 
-const MODULE_BY_PATH: Record<string, string> = {
+const MODULE_BY_PATH: Record<string, ModuleKey> = {
   "/dashboard": "dashboard",
   "/pos": "pos",
   "/transactions": "transactions",
@@ -16,23 +17,6 @@ const MODULE_BY_PATH: Record<string, string> = {
   "/users": "users",
   "/printer": "printer",
   "/settings": "settings",
-};
-
-const PERMS: Record<string, string[]> = {
-  ADMIN: ["*"],
-  MANAGER: [
-    "dashboard",
-    "pos",
-    "transactions",
-    "products",
-    "categories",
-    "inventory",
-    "recipes",
-    "reports",
-    "shifts",
-    "printer",
-  ],
-  CASHIER: ["pos", "transactions", "shifts", "printer"],
 };
 
 export async function middleware(req: NextRequest) {
@@ -55,8 +39,7 @@ export async function middleware(req: NextRequest) {
     ([p]) => pathname === p || pathname.startsWith(`${p}/`),
   )?.[1];
   if (moduleKey) {
-    const allowed = PERMS[session.role] ?? [];
-    if (!allowed.includes("*") && !allowed.includes(moduleKey)) {
+    if (!can(session.role, moduleKey)) {
       return new NextResponse("Forbidden", { status: 403 });
     }
   }
