@@ -58,6 +58,7 @@ export const users = pgTable("users", {
   image: varchar("image", { length: 255 }),
   passwordHash: varchar("password_hash", { length: 255 }).notNull(),
   isActive: boolean("is_active").notNull().default(true),
+  mustChangePassword: boolean("must_change_password").notNull().default(false),
   lastLogin: timestamp("last_login", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

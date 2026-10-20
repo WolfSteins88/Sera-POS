@@ -75,6 +75,8 @@ export type BackupDump = {
   users?: Record<string, unknown>[];
 } & Partial<Record<(typeof BACKUP_TABLES)[number], Record<string, unknown>[]>>;
 
+type Row = Record<string, unknown>;
+
 function ident(name: string) {
   if (!/^[a-z_][a-z0-9_]*$/.test(name)) throw new Error("Nama tabel tidak valid.");
   return name;
@@ -85,28 +87,28 @@ export async function exportBackupDump() {
   const dump: BackupDump = {
     generatedAt: new Date().toISOString(),
     kind: "sora-pos-backup",
-    users: await sql`SELECT id, role, name, username, email, is_active, created_at FROM users`,
+    users: await sql<Row[]>`SELECT id, role, name, username, email, is_active, created_at FROM users`,
   };
-  dump.categories = await sql`SELECT * FROM categories`;
-  dump.products = await sql`SELECT * FROM products`;
-  dump.product_variants = await sql`SELECT * FROM product_variants`;
-  dump.product_variant_options = await sql`SELECT * FROM product_variant_options`;
-  dump.addons = await sql`SELECT * FROM addons`;
-  dump.product_addons = await sql`SELECT * FROM product_addons`;
-  dump.inventory_items = await sql`SELECT * FROM inventory_items`;
-  dump.inventory_movements = await sql`SELECT * FROM inventory_movements`;
-  dump.recipes = await sql`SELECT * FROM recipes`;
-  dump.recipe_items = await sql`SELECT * FROM recipe_items`;
-  dump.printers = await sql`SELECT * FROM printers`;
-  dump.settings = await sql`SELECT * FROM settings`;
-  dump.held_orders = await sql`SELECT * FROM held_orders`;
-  dump.shifts = await sql`SELECT * FROM shifts`;
-  dump.transactions = await sql`SELECT * FROM transactions`;
-  dump.transaction_items = await sql`SELECT * FROM transaction_items`;
-  dump.transaction_item_variants = await sql`SELECT * FROM transaction_item_variants`;
-  dump.transaction_item_addons = await sql`SELECT * FROM transaction_item_addons`;
-  dump.payments = await sql`SELECT * FROM payments`;
-  dump.transaction_counters = await sql`SELECT * FROM transaction_counters`;
+  dump.categories = await sql<Row[]>`SELECT * FROM categories`;
+  dump.products = await sql<Row[]>`SELECT * FROM products`;
+  dump.product_variants = await sql<Row[]>`SELECT * FROM product_variants`;
+  dump.product_variant_options = await sql<Row[]>`SELECT * FROM product_variant_options`;
+  dump.addons = await sql<Row[]>`SELECT * FROM addons`;
+  dump.product_addons = await sql<Row[]>`SELECT * FROM product_addons`;
+  dump.inventory_items = await sql<Row[]>`SELECT * FROM inventory_items`;
+  dump.inventory_movements = await sql<Row[]>`SELECT * FROM inventory_movements`;
+  dump.recipes = await sql<Row[]>`SELECT * FROM recipes`;
+  dump.recipe_items = await sql<Row[]>`SELECT * FROM recipe_items`;
+  dump.printers = await sql<Row[]>`SELECT * FROM printers`;
+  dump.settings = await sql<Row[]>`SELECT * FROM settings`;
+  dump.held_orders = await sql<Row[]>`SELECT * FROM held_orders`;
+  dump.shifts = await sql<Row[]>`SELECT * FROM shifts`;
+  dump.transactions = await sql<Row[]>`SELECT * FROM transactions`;
+  dump.transaction_items = await sql<Row[]>`SELECT * FROM transaction_items`;
+  dump.transaction_item_variants = await sql<Row[]>`SELECT * FROM transaction_item_variants`;
+  dump.transaction_item_addons = await sql<Row[]>`SELECT * FROM transaction_item_addons`;
+  dump.payments = await sql<Row[]>`SELECT * FROM payments`;
+  dump.transaction_counters = await sql<Row[]>`SELECT * FROM transaction_counters`;
   return dump;
 }
 
@@ -158,7 +160,7 @@ export async function restoreBackupDump(dump: BackupDump, sessionUserId: string)
         const quoted = cols.map((c) => ident(c)).join(", ");
         await tx.unsafe(
           `INSERT INTO ${ident(table)} (${quoted}) VALUES (${placeholders})`,
-          cols.map((c) => row[c]),
+          cols.map((c) => row[c]) as never[],
         );
       }
     }

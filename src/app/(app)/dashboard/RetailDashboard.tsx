@@ -37,21 +37,21 @@ const MONTHS = [
   "November",
   "Desember",
 ] as const;
-const JAKARTA_OFFSET_MS = 7 * 60 * 60 * 1000;
+const WITA_OFFSET_MS = 8 * 60 * 60 * 1000;
 
-function jakartaDate(value: string | Date | number = Date.now()) {
-  return new Date(new Date(value).getTime() + JAKARTA_OFFSET_MS);
+function witaDate(value: string | Date | number = Date.now()) {
+  return new Date(new Date(value).getTime() + WITA_OFFSET_MS);
 }
 
 function greeting(name: string) {
-  const hour = jakartaDate().getUTCHours();
+  const hour = witaDate().getUTCHours();
   const hello = hour < 11 ? "Selamat pagi" : hour < 15 ? "Selamat siang" : hour < 19 ? "Selamat sore" : "Selamat malam";
   const first = name.trim().split(/\s+/)[0] || "Admin";
   return `${hello}, ${first}`;
 }
 
-function formatJakarta(value: string | Date | number) {
-  const date = jakartaDate(value);
+function formatWitaDate(value: string | Date | number) {
+  const date = witaDate(value);
   return `${WEEKDAYS[date.getUTCDay()]}, ${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
 }
 
@@ -117,7 +117,7 @@ export function RetailDashboard({ data, userName }: { data: Data; userName: stri
         </div>
         <p className="inline-flex min-h-11 items-center gap-2 rounded-full border border-line bg-surface px-3 text-sm shadow-card">
           <Calendar size={16} aria-hidden />
-          {formatJakarta(Date.now())}
+          {formatWitaDate(Date.now())}
         </p>
       </div>
 

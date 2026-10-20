@@ -10,7 +10,14 @@ export default async function PosPage() {
   if (!session) return null;
   const settings = await getSettingsMap();
   const shopMode = normalizeShopMode(settings.shop_mode);
-  const { categories, products } = await posCatalog(shopMode);
+  const { categories, products: listed } = await posCatalog(shopMode);
+  // Match checkout: when negative stock is allowed, goods that merely ran out stay sellable.
+  const allowNegative = settings.allow_negative_stock === "1";
+  const products = listed.map((p) =>
+    allowNegative && p.kind === "goods" && p.stockStatus === "sold_out" && Number(p.currentStock) <= 0
+      ? { ...p, stockStatus: "available" as const }
+      : p,
+  );
   const catalog: Record<string, Awaited<ReturnType<typeof getProductDetail>>> = {};
   for (const p of products.filter((x) => x.kind === "recipe" || x.useVariants || x.useAddons)) {
     catalog[p.id] = await getProductDetail(p.id);

@@ -7,6 +7,7 @@ import { normalizeShopMode } from "@/lib/theme";
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   if (!session) redirect("/login");
+  if (session.mustChangePassword) redirect("/change-password");
   const shopName = await getSetting("shop_name", "Toko");
   const shopMode = normalizeShopMode(await getSetting("shop_mode", "fnb"));
   return (
