@@ -334,6 +334,48 @@ textarea {
   animation: fade-in var(--motion-enter) var(--ease-out-curve) both;
 }
 
+/* Import loader: four colored tiles pop out of a rotating 2x2 grid. */
+.tile-loader {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3px;
+  animation: tile-loader-spin 3.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.tile-loader-cell {
+  border-radius: 3px;
+  background: rgb(0 0 0 / 0.06);
+}
+
+.tile-loader-tile {
+  position: absolute;
+  width: calc(50% - 1.5px);
+  height: calc(50% - 1.5px);
+  border-radius: 3px;
+  animation: tile-loader-pop 1.6s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+}
+
+.tile-loader-tile:nth-of-type(5) { top: 0; left: 0; background: #fbbc05; --dx: -70%; --dy: -70%; }
+.tile-loader-tile:nth-of-type(6) { top: 0; right: 0; background: #4f7ec7; --dx: 70%; --dy: -70%; animation-delay: 0.4s; }
+.tile-loader-tile:nth-of-type(7) { bottom: 0; right: 0; background: #e53935; --dx: 70%; --dy: 70%; animation-delay: 0.8s; }
+.tile-loader-tile:nth-of-type(8) { bottom: 0; left: 0; background: #34b350; --dx: -70%; --dy: 70%; animation-delay: 1.2s; }
+
+@keyframes tile-loader-spin {
+  0%, 10% { transform: rotate(0deg); }
+  25%, 35% { transform: rotate(90deg); }
+  50%, 60% { transform: rotate(180deg); }
+  75%, 85% { transform: rotate(270deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes tile-loader-pop {
+  0%, 60%, 100% { transform: translate(0, 0) rotate(0deg); }
+  30% { transform: translate(var(--dx), var(--dy)) rotate(20deg); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root,
   html[data-shop-mode] {
