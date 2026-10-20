@@ -27,7 +27,7 @@ function pick(rand, items) {
 function iso(day, hour, minute) {
   const hh = String(hour).padStart(2, "0");
   const mm = String(minute).padStart(2, "0");
-  return `${day}T${hh}:${mm}:00+07:00`;
+  return `${day}T${hh}:${mm}:00+08:00`;
 }
 
 const now = new Date().toISOString();
@@ -88,7 +88,7 @@ const products = productsMeta.map((p) => ({
   sort_order: p.sort,
   catalog_pack: "retail",
   created_at: iso("2026-08-01", 9, 0),
-  updated_at: iso("2026-09-23", 20, 0),
+  updated_at: iso("2026-10-20", 20, 0),
 }));
 const prod = Object.fromEntries(productsMeta.map((p) => [p.key, id(`prod-${p.key}`)]));
 const prodByKey = Object.fromEntries(productsMeta.map((p) => [p.key, p]));
@@ -150,16 +150,16 @@ const weighted = [
 ];
 
 const payMethods = ["qris", "qris", "qris", "debit", "debit", "ewallet", "cash"];
-const rand = mulberry32(20260923);
+const rand = mulberry32(20261020);
 const shifts = [];
 const transactions = [];
 const transaction_items = [];
 const payments = [];
 const transaction_counters = [];
 
-for (let d = 1; d <= 23; d++) {
-  const day = `2026-09-${String(d).padStart(2, "0")}`;
-  const date = new Date(`${day}T12:00:00+07:00`);
+for (let d = 1; d <= 20; d++) {
+  const day = `2026-10-${String(d).padStart(2, "0")}`;
+  const date = new Date(`${day}T12:00:00+08:00`);
   const dow = date.getDay();
   const weekend = dow === 0 || dow === 6;
   const count = weekend ? 7 + Math.floor(rand() * 5) : 16 + Math.floor(rand() * 8);

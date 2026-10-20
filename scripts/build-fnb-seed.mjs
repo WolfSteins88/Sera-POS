@@ -27,7 +27,7 @@ function pick(rand, items) {
 function iso(day, hour, minute) {
   const hh = String(hour).padStart(2, "0");
   const mm = String(minute).padStart(2, "0");
-  return `${day}T${hh}:${mm}:00+07:00`;
+  return `${day}T${hh}:${mm}:00+08:00`;
 }
 
 const now = new Date().toISOString();
@@ -88,7 +88,7 @@ const products = productsMeta.map((p) => ({
   sort_order: p.sort,
   catalog_pack: "fnb",
   created_at: iso("2026-08-01", 8, 0),
-  updated_at: iso("2026-09-22", 21, 0),
+  updated_at: iso("2026-10-20", 21, 0),
 }));
 const prod = Object.fromEntries(productsMeta.map((p) => [p.key, id(`prod-${p.key}`)]));
 const prodByKey = Object.fromEntries(productsMeta.map((p) => [p.key, p]));
@@ -190,7 +190,7 @@ const inventory_items = invMeta.map((i) => ({
   cost: String(i.cost),
   status: "active",
   created_at: iso("2026-08-01", 8, 0),
-  updated_at: iso("2026-09-22", 21, 0),
+  updated_at: iso("2026-10-20", 21, 0),
 }));
 const inv = Object.fromEntries(invMeta.map((i) => [i.key, id(`inv-${i.key}`)]));
 
@@ -296,7 +296,7 @@ const weighted = [
   ...Array(2).fill("banana"),
 ];
 
-const rand = mulberry32(20260922);
+const rand = mulberry32(20261020);
 const shifts = [];
 const transactions = [];
 const transaction_items = [];
@@ -314,15 +314,17 @@ function deductRecipe(productKey, qty) {
   }
 }
 
-for (let d = 1; d <= 22; d++) {
-  const day = `2026-09-${String(d).padStart(2, "0")}`;
-  const date = new Date(`${day}T12:00:00+07:00`);
+for (let d = 1; d <= 20; d++) {
+  const day = `2026-10-${String(d).padStart(2, "0")}`;
+  const date = new Date(`${day}T12:00:00+08:00`);
   const dow = date.getDay();
   const weekend = dow === 0 || dow === 6;
   const count = weekend ? 20 + Math.floor(rand() * 9) : 12 + Math.floor(rand() * 7);
   const shiftId = id(`shift-${day}`);
   let cashSales = 0;
   const opening = 500000;
+  // Food and bottled drinks are restocked every morning, so later days don't run dry.
+  for (const key of Object.keys(goodsStock)) goodsStock[key] = prodByKey[key].stock;
 
   for (let n = 1; n <= count; n++) {
     const minuteOff = 30 + Math.floor((n / (count + 1)) * 12 * 60) + Math.floor(rand() * 8);
