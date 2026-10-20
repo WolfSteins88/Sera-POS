@@ -1,4 +1,4 @@
-# UMKM POS — Design System Master
+# Sera POS — Design System Master
 
 Source: UI/UX Pro Max product/style/color/typography match (python CLI unavailable; mapped from skill CSVs).
 
