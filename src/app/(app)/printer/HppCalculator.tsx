@@ -15,6 +15,7 @@ import {
 } from "@/components/ui";
 import { formatIdDecimal, money, parseIdNumber } from "@/lib/format";
 import type { RecipeHppRow } from "@/server/queries";
+import { ButtonLoader } from "@/components/FormPending";
 
 type InventoryOption = { id: string; name: string; sku: string; unit: string; cost: string };
 
@@ -375,7 +376,8 @@ export function HppCalculator({
 
       <div className="mt-4">
         <PrimaryButton type="button" className="h-11 w-full" disabled={pending || !hpp} onClick={() => void save()}>
-          {pending ? "Menyimpan…" : "Simpan HPP"}
+          Simpan HPP
+          <ButtonLoader show={pending} />
         </PrimaryButton>
       </div>
     </Card>

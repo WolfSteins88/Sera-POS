@@ -5,6 +5,7 @@ import { Trash2 } from "lucide-react";
 import { deleteCategory, saveCategory } from "@/app/actions/ops";
 import { ImageField } from "@/components/ImageField";
 import { inputClass, PrimaryButton } from "@/components/ui";
+import { FormPending } from "@/components/FormPending";
 
 export function CategoryForm({
   category,
@@ -70,6 +71,7 @@ export function CategoryForm({
           >
             <Trash2 size={15} aria-hidden />
             Hapus Kategori
+            <FormPending action={deleteCategory} />
           </button>
         ) : (
           <span />

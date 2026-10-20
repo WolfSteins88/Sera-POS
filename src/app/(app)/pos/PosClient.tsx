@@ -25,6 +25,7 @@ import { money, num } from "@/lib/format";
 import { EmptyState, PrimaryButton, inputClass } from "@/components/ui";
 import { MoneyInput } from "@/components/MoneyInput";
 import { ProductImage } from "@/components/ProductImage";
+import { ButtonLoader } from "@/components/FormPending";
 
 type Product = {
   id: string;
@@ -699,6 +700,7 @@ export function PosClient({
             className="btn inline-flex items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-white disabled:opacity-50"
           >
             Proses pembayaran
+            <ButtonLoader show={busy} />
           </button>
         </div>
         {heldCarts.length ? (

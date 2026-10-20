@@ -7,6 +7,7 @@ import { deleteUser, saveUser } from "@/app/actions/ops";
 import { ProductImage } from "@/components/ProductImage";
 import { inputClass, PrimaryButton } from "@/components/ui";
 import { can, type ModuleKey, type Role } from "@/lib/rbac";
+import { FormPending } from "@/components/FormPending";
 
 const ACCESS: { module: ModuleKey; label: string }[] = [
   { module: "dashboard", label: "Dashboard" },
@@ -129,6 +130,7 @@ export function UserDetail({
             <button type="submit" formAction={deleteUser} formNoValidate className="btn inline-flex h-11 w-full items-center justify-center gap-2 rounded-full bg-danger/10 text-sm font-medium text-danger">
               <Trash2 size={15} aria-hidden />
               Hapus
+              <FormPending action={deleteUser} />
             </button>
           ) : (
             <Link href={cancelHref} className="btn inline-flex h-11 w-full items-center justify-center rounded-full border border-line text-sm font-medium">

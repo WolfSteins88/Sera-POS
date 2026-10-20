@@ -3,6 +3,7 @@ import { KeyRound } from "lucide-react";
 import { changePasswordAction, logoutAction } from "@/app/actions/auth";
 import { Field } from "@/components/ui";
 import { getSession } from "@/lib/auth";
+import { FormPending } from "@/components/FormPending";
 
 export default async function ChangePasswordPage({
   searchParams,
@@ -33,12 +34,14 @@ export default async function ChangePasswordPage({
           </Field>
           <button type="submit" className="btn mt-1 w-full rounded-xl bg-accent text-sm font-semibold text-white">
             Simpan password
+            <FormPending />
           </button>
         </div>
       </form>
       <form action={logoutAction} className="mx-auto mt-4 w-full max-w-[380px]">
         <button type="submit" className="text-sm text-muted underline">
           Keluar
+          <FormPending size="xs" />
         </button>
       </form>
     </section>

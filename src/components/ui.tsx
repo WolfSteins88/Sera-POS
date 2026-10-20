@@ -1,3 +1,5 @@
+import { FormPending } from "@/components/FormPending";
+
 export function PageHeader({
   title,
   description,
@@ -121,6 +123,7 @@ export function PrimaryButton({
       className={`btn pressable inline-flex items-center justify-center rounded-xl bg-accent px-4 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-50 ${props.className ?? ""}`}
     >
       {children}
+      {props.type === "button" ? null : <FormPending action={props.formAction} formId={props.form} />}
     </button>
   );
 }
@@ -132,6 +135,7 @@ export function GhostButton({
   return (
     <button {...props} className={`${ghostButtonClass} ${props.className ?? ""}`}>
       {children}
+      {props.type === "button" ? null : <FormPending action={props.formAction} formId={props.form} />}
     </button>
   );
 }

@@ -2,6 +2,7 @@
 
 import { RotateCcw } from "lucide-react";
 import { cancelTransactionAction } from "@/app/actions/ops";
+import { FormPending } from "@/components/FormPending";
 
 export function RefundButton({ id }: { id: string }) {
   return (
@@ -21,6 +22,7 @@ export function RefundButton({ id }: { id: string }) {
       >
         <RotateCcw size={16} aria-hidden />
         Refund
+        <FormPending />
       </button>
     </form>
   );

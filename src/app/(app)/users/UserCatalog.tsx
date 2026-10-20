@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { LayoutGrid, List, MoreHorizontal, Search } from "lucide-react";
 import { resetUserPassword } from "@/app/actions/ops";
 import { ProductImage } from "@/components/ProductImage";
+import { FormPending } from "@/components/FormPending";
 
 const PILL = "h-11 shrink-0 rounded-full border border-line bg-white px-3 text-sm outline-none focus:border-accent";
 
@@ -304,6 +305,7 @@ function RowMenu({ id, name }: { id: string; name: string }) {
           </label>
           <button type="submit" className="w-full rounded-lg bg-chip px-3 py-2 text-left text-sm hover:bg-line">
             Reset sandi
+            <FormPending size="xs" />
           </button>
         </form>
       </div>

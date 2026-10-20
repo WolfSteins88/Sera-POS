@@ -7,6 +7,7 @@ import { getDb } from "@/lib/db";
 import { money } from "@/lib/format";
 import { categories, inventoryItems, products, recipeItems, recipes } from "@/lib/schema";
 import { RecipeCatalog } from "./RecipeCatalog";
+import { FormPending } from "@/components/FormPending";
 
 const PAGE_SIZE = 8;
 
@@ -253,6 +254,7 @@ export default async function RecipesPage({
                   <input type="hidden" name="id" value={current.id} />
                   <button type="submit" className="btn inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent text-sm font-semibold text-white">
                     Duplikasi Resep
+                    <FormPending />
                   </button>
                 </form>
               </div>
