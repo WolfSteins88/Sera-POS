@@ -7,6 +7,7 @@ import { getSession } from "@/lib/auth";
 import { money, num } from "@/lib/format";
 import { getOpenShift, shiftDesk, type ShiftDeskRow } from "@/server/queries";
 import { ShiftFilters } from "./ShiftFilters";
+import { DataPending, DataPendingArea } from "@/components/DataPending";
 import { FormPending } from "@/components/FormPending";
 
 const CARD = "rounded-2xl border border-line bg-surface p-4 shadow-card";
@@ -107,7 +108,7 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
   const ownOpen = viewing?.status === "open" && viewing.userId === session.id;
 
   return (
-    <div>
+    <DataPending>
       <div className="mb-5">
         <h1 className="text-2xl font-semibold tracking-tight">Shift</h1>
         <p className="mt-1 text-sm text-muted">Kelola aktivitas shift kasir dan pantau ringkasan kas harian.</p>
@@ -150,74 +151,76 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
           {desk.rows.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted">Tidak ada shift yang cocok.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[52rem] border-separate border-spacing-y-1.5 text-left text-sm">
-                <thead className="text-xs uppercase tracking-wide text-muted">
-                  <tr>
-                    <th className="px-3 pb-1 font-medium first:pl-4">No. Shift</th>
-                    <th className="px-3 pb-1 font-medium">Kasir</th>
-                    <th className="px-3 pb-1 font-medium">Waktu Mulai</th>
-                    <th className="px-3 pb-1 font-medium">Waktu Selesai</th>
-                    <th className="px-3 pb-1 font-medium">Modal Awal</th>
-                    <th className="px-3 pb-1 font-medium">Total Penjualan</th>
-                    <th className="px-3 pb-1 font-medium">Selisih</th>
-                    <th className="px-3 pb-1 font-medium">Status</th>
-                    <th className="px-3 pb-1 font-medium last:pr-4">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {desk.rows.map((row) => {
-                    const selected = viewing?.id === row.id;
-                    const tone = selected
-                      ? "bg-accent-soft/50"
-                      : row.status === "open"
-                        ? "group-hover:bg-ok-soft"
-                        : "group-hover:bg-accent-soft/45";
-                    const cell = `px-3 py-2.5 align-middle transition-colors duration-ui first:rounded-l-2xl first:pl-4 last:rounded-r-2xl last:pr-4 ${tone}`;
-                    return (
-                      <tr key={row.id} className="group text-ink">
-                        <td className={`relative font-medium ${cell}`}>
-                          {selected ? <span aria-hidden className="absolute top-1/2 left-1.5 h-5 w-1 -translate-y-1/2 rounded-full bg-accent" /> : null}
-                          {row.shiftNumber}
-                        </td>
-                        <td className={cell}>
-                          <span className="inline-flex items-center gap-2">
-                            <span className="inline-flex size-8 items-center justify-center rounded-full bg-white text-xs font-semibold text-accent ring-1 ring-line">
-                              {initials(row.cashierName)}
+            <DataPendingArea>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[52rem] border-separate border-spacing-y-1.5 text-left text-sm">
+                  <thead className="text-xs uppercase tracking-wide text-muted">
+                    <tr>
+                      <th className="px-3 pb-1 font-medium first:pl-4">No. Shift</th>
+                      <th className="px-3 pb-1 font-medium">Kasir</th>
+                      <th className="px-3 pb-1 font-medium">Waktu Mulai</th>
+                      <th className="px-3 pb-1 font-medium">Waktu Selesai</th>
+                      <th className="px-3 pb-1 font-medium">Modal Awal</th>
+                      <th className="px-3 pb-1 font-medium">Total Penjualan</th>
+                      <th className="px-3 pb-1 font-medium">Selisih</th>
+                      <th className="px-3 pb-1 font-medium">Status</th>
+                      <th className="px-3 pb-1 font-medium last:pr-4">Aksi</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {desk.rows.map((row) => {
+                      const selected = viewing?.id === row.id;
+                      const tone = selected
+                        ? "bg-accent-soft/50"
+                        : row.status === "open"
+                          ? "group-hover:bg-ok-soft"
+                          : "group-hover:bg-accent-soft/45";
+                      const cell = `px-3 py-2.5 align-middle transition-colors duration-ui first:rounded-l-2xl first:pl-4 last:rounded-r-2xl last:pr-4 ${tone}`;
+                      return (
+                        <tr key={row.id} className="group text-ink">
+                          <td className={`relative font-medium ${cell}`}>
+                            {selected ? <span aria-hidden className="absolute top-1/2 left-1.5 h-5 w-1 -translate-y-1/2 rounded-full bg-accent" /> : null}
+                            {row.shiftNumber}
+                          </td>
+                          <td className={cell}>
+                            <span className="inline-flex items-center gap-2">
+                              <span className="inline-flex size-8 items-center justify-center rounded-full bg-white text-xs font-semibold text-accent ring-1 ring-line">
+                                {initials(row.cashierName)}
+                              </span>
+                              <span className="font-medium">{row.cashierName}</span>
                             </span>
-                            <span className="font-medium">{row.cashierName}</span>
-                          </span>
-                        </td>
-                        <td className={cell}>{clock(row.openingAt)}</td>
-                        <td className={cell}>{row.closingAt ? clock(row.closingAt) : "-"}</td>
-                        <td className={cell}>{money(num(row.openingCash))}</td>
-                        <td className={`font-medium ${cell}`}>{money(num(row.sales))}</td>
-                        <td className={`${cell} ${row.status === "closed" && num(row.difference) < 0 ? "font-medium text-danger" : ""}`}>
-                          {row.status === "open" ? "-" : money(num(row.difference))}
-                        </td>
-                        <td className={cell}>
-                          <span
-                            className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                              row.status === "open" ? "bg-white text-ok ring-1 ring-ok" : "bg-ok-soft text-ok"
-                            }`}
-                          >
-                            {row.status === "open" ? "Aktif" : "Selesai"}
-                          </span>
-                        </td>
-                        <td className={cell}>
-                          <div className="flex items-center gap-1">
-                            <Link href={href(query, { id: row.id, edit: "" })} className="rounded-full border border-line bg-white px-3 py-1 text-xs font-medium">
-                              Lihat
-                            </Link>
-                            {isAdmin ? <AdminMenu row={row} query={query} /> : null}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                          </td>
+                          <td className={cell}>{clock(row.openingAt)}</td>
+                          <td className={cell}>{row.closingAt ? clock(row.closingAt) : "-"}</td>
+                          <td className={cell}>{money(num(row.openingCash))}</td>
+                          <td className={`font-medium ${cell}`}>{money(num(row.sales))}</td>
+                          <td className={`${cell} ${row.status === "closed" && num(row.difference) < 0 ? "font-medium text-danger" : ""}`}>
+                            {row.status === "open" ? "-" : money(num(row.difference))}
+                          </td>
+                          <td className={cell}>
+                            <span
+                              className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
+                                row.status === "open" ? "bg-white text-ok ring-1 ring-ok" : "bg-ok-soft text-ok"
+                              }`}
+                            >
+                              {row.status === "open" ? "Aktif" : "Selesai"}
+                            </span>
+                          </td>
+                          <td className={cell}>
+                            <div className="flex items-center gap-1">
+                              <Link href={href(query, { id: row.id, edit: "" })} className="rounded-full border border-line bg-white px-3 py-1 text-xs font-medium">
+                                Lihat
+                              </Link>
+                              {isAdmin ? <AdminMenu row={row} query={query} /> : null}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </DataPendingArea>
           )}
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-sm text-muted">
@@ -259,7 +262,7 @@ export default async function ShiftsPage({ searchParams }: { searchParams: Promi
           )}
         </aside>
       </div>
-    </div>
+    </DataPending>
   );
 }
 
