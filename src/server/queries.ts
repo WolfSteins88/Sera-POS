@@ -67,55 +67,84 @@ export async function listProducts(pack: "fnb" | "retail") {
 }
 
 export async function getProductDetail(id: string) {
+  const details = await getProductDetails([id]);
+  return details.get(id) ?? null;
+}
+
+/** Loads several products with their variants, add-ons and recipe in a fixed number of queries. */
+export async function getProductDetails(ids: string[]) {
+  const details = new Map<string, NonNullable<Awaited<ReturnType<typeof loadProductDetails>>[number]>>();
+  if (ids.length === 0) return details;
+  for (const detail of await loadProductDetails(ids)) details.set(detail.id, detail);
+  return details;
+}
+
+async function loadProductDetails(ids: string[]) {
   const db = getDb();
-  const [product] = await db.select().from(products).where(eq(products.id, id)).limit(1);
-  if (!product) return null;
-  const variants = await db
-    .select()
-    .from(productVariants)
-    .where(eq(productVariants.productId, id))
-    .orderBy(productVariants.sortOrder);
+  const [rows, variants, linkedAddons, recipeRows] = await Promise.all([
+    db.select().from(products).where(inArray(products.id, ids)),
+    db
+      .select()
+      .from(productVariants)
+      .where(inArray(productVariants.productId, ids))
+      .orderBy(productVariants.sortOrder),
+    db
+      .select({
+        productId: productAddons.productId,
+        id: addons.id,
+        name: addons.name,
+        price: addons.price,
+        status: addons.status,
+      })
+      .from(productAddons)
+      .innerJoin(addons, eq(addons.id, productAddons.addonId))
+      .where(inArray(productAddons.productId, ids)),
+    db.select().from(recipes).where(inArray(recipes.productId, ids)),
+  ]);
   const variantIds = variants.map((v) => v.id);
-  const options =
+  const recipeIds = recipeRows.map((r) => r.id);
+  const [options, recipeLines] = await Promise.all([
     variantIds.length === 0
       ? []
-      : await db.select().from(productVariantOptions).where(inArray(productVariantOptions.variantId, variantIds));
-  const linkedAddons = await db
-    .select({
-      id: addons.id,
-      name: addons.name,
-      price: addons.price,
-      status: addons.status,
-    })
-    .from(productAddons)
-    .innerJoin(addons, eq(addons.id, productAddons.addonId))
-    .where(eq(productAddons.productId, id));
-  const [recipe] = await db.select().from(recipes).where(eq(recipes.productId, id)).limit(1);
-  const recipeLines = recipe
-    ? await db
-        .select({
-          name: inventoryItems.name,
-          unit: inventoryItems.unit,
-          quantity: recipeItems.quantity,
-        })
-        .from(recipeItems)
-        .innerJoin(inventoryItems, eq(inventoryItems.id, recipeItems.inventoryItemId))
-        .where(eq(recipeItems.recipeId, recipe.id))
-    : [];
-  return {
-    ...product,
-    variants: variants.map((v) => ({
-      ...v,
-      options: options.filter((o) => o.variantId === v.id),
-    })),
-    addons: linkedAddons,
-    recipe,
-    recipeLines: recipeLines.map((line) => ({
-      name: line.name,
-      unit: line.unit,
-      quantity: num(line.quantity),
-    })),
-  };
+      : db.select().from(productVariantOptions).where(inArray(productVariantOptions.variantId, variantIds)),
+    recipeIds.length === 0
+      ? []
+      : db
+          .select({
+            recipeId: recipeItems.recipeId,
+            name: inventoryItems.name,
+            unit: inventoryItems.unit,
+            quantity: recipeItems.quantity,
+          })
+          .from(recipeItems)
+          .innerJoin(inventoryItems, eq(inventoryItems.id, recipeItems.inventoryItemId))
+          .where(inArray(recipeItems.recipeId, recipeIds)),
+  ]);
+  return rows.map((product) => {
+    const recipe = recipeRows.find((r) => r.productId === product.id);
+    return {
+      ...product,
+      variants: variants
+        .filter((v) => v.productId === product.id)
+        .map((v) => ({
+          ...v,
+          options: options.filter((o) => o.variantId === v.id),
+        })),
+      addons: linkedAddons
+        .filter((a) => a.productId === product.id)
+        .map(({ id, name, price, status }) => ({ id, name, price, status })),
+      recipe,
+      recipeLines: recipe
+        ? recipeLines
+            .filter((line) => line.recipeId === recipe.id)
+            .map((line) => ({
+              name: line.name,
+              unit: line.unit,
+              quantity: num(line.quantity),
+            }))
+        : [],
+    };
+  });
 }
 
 export async function posCatalog(shopMode = "fnb") {

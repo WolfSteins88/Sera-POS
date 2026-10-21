@@ -1,5 +1,5 @@
 import { getSql } from "@/lib/db";
-import { getSetting } from "@/lib/settings";
+import { getRenderSetting } from "@/lib/settings";
 import { catalogPackFromQuery } from "@/lib/theme";
 import { listCategories } from "@/server/queries";
 import { CategoryCatalog } from "./CategoryCatalog";
@@ -13,7 +13,7 @@ export default async function CategoriesPage({
   searchParams: Promise<{ q?: string; status?: string; sort?: string; page?: string; id?: string; new?: string; pack?: string }>;
 }) {
   const params = await searchParams;
-  const shopMode = await getSetting("shop_mode", "fnb");
+  const shopMode = await getRenderSetting("shop_mode", "fnb");
   const pack = catalogPackFromQuery(params.pack, shopMode);
   const [rows, counts] = await Promise.all([
     listCategories(false, pack),

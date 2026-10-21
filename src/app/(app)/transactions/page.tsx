@@ -4,7 +4,7 @@ import { Ban, Receipt, ShoppingCart, TrendingDown, TrendingUp, Wallet, X } from 
 import { DataPending, DataPendingArea } from "@/components/DataPending";
 import { ProductImage } from "@/components/ProductImage";
 import { money, num } from "@/lib/format";
-import { getSettingsMap } from "@/lib/settings";
+import { getRenderSettings } from "@/lib/settings";
 import { normalizeShopMode } from "@/lib/theme";
 import { getTransactionFull, transactionDesk } from "@/server/queries";
 import { PrintButton } from "./[id]/PrintButton";
@@ -83,7 +83,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
       cashierId: params.cashier,
       page,
     }),
-    getSettingsMap(),
+    getRenderSettings(),
     params.id ? getTransactionFull(params.id) : Promise.resolve(null),
   ]);
   const currency = settings.currency || "Rp";

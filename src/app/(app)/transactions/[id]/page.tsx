@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Card, PageHeader } from "@/components/ui";
 import { money, num } from "@/lib/format";
-import { getSettingsMap } from "@/lib/settings";
+import { getRenderSettings } from "@/lib/settings";
 import { normalizeShopMode } from "@/lib/theme";
 import { getTransactionFull } from "@/server/queries";
 import { PrintButton } from "./PrintButton";
@@ -10,7 +10,7 @@ export default async function TransactionDetailPage({ params }: { params: Promis
   const { id } = await params;
   const trx = await getTransactionFull(id);
   if (!trx) notFound();
-  const settings = await getSettingsMap();
+  const settings = await getRenderSettings();
   const retail = normalizeShopMode(settings.shop_mode) === "retail";
   return (
     <div className="max-w-xl">

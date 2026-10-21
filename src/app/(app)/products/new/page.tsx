@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { ProductForm } from "../ProductForm";
 import { getDb } from "@/lib/db";
 import { addons } from "@/lib/schema";
-import { getSetting } from "@/lib/settings";
+import { getRenderSetting } from "@/lib/settings";
 import { catalogPackFromQuery } from "@/lib/theme";
 import { listCategories } from "@/server/queries";
 
@@ -12,7 +12,7 @@ export default async function NewProductPage({
   searchParams: Promise<{ pack?: string }>;
 }) {
   const params = await searchParams;
-  const shopMode = await getSetting("shop_mode", "fnb");
+  const shopMode = await getRenderSetting("shop_mode", "fnb");
   const pack = catalogPackFromQuery(params.pack, shopMode);
   const categories = await listCategories(false, pack);
   return (

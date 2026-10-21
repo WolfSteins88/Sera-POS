@@ -3,7 +3,7 @@ import { CheckCircle2, CirclePlay, Clock, MoreHorizontal, TrendingDown, Trending
 import { closeShift, deleteShiftAdmin, openShift, updateShiftAdmin } from "@/app/actions/ops";
 import { Field, PrimaryButton, inputClass } from "@/components/ui";
 import { MoneyInput } from "@/components/MoneyInput";
-import { getSession } from "@/lib/auth";
+import { getRenderSession } from "@/lib/auth";
 import { money, num } from "@/lib/format";
 import { getOpenShift, shiftDesk, type ShiftDeskRow } from "@/server/queries";
 import { ShiftFilters } from "./ShiftFilters";
@@ -78,7 +78,7 @@ function Delta({ current, previous }: { current: number; previous: number }) {
 }
 
 export default async function ShiftsPage({ searchParams }: { searchParams: Promise<Query> }) {
-  const session = await getSession();
+  const session = await getRenderSession();
   if (!session) return null;
   const params = await searchParams;
   const isAdmin = session.role === "ADMIN";

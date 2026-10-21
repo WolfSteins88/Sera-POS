@@ -2,7 +2,7 @@ import type { CSSProperties } from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import type { Metadata } from "next";
 import "./globals.css";
-import { getSetting } from "@/lib/settings";
+import { getRenderSetting } from "@/lib/settings";
 import { normalizeShopMode, parseAccentColor } from "@/lib/theme";
 
 const jakarta = Plus_Jakarta_Sans({
@@ -21,8 +21,8 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   let shopMode = "fnb";
   let accent = "";
   try {
-    shopMode = normalizeShopMode(await getSetting("shop_mode", "fnb"));
-    accent = parseAccentColor(await getSetting("ui_accent_color", ""));
+    shopMode = normalizeShopMode(await getRenderSetting("shop_mode", "fnb"));
+    accent = parseAccentColor(await getRenderSetting("ui_accent_color", ""));
   } catch {
     shopMode = "fnb";
   }

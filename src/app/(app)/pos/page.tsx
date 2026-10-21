@@ -1,16 +1,19 @@
-import { getSettingsMap } from "@/lib/settings";
-import { getSession } from "@/lib/auth";
-import { getProductDetail, listHeldOrders, posCatalog, getOpenShift } from "@/server/queries";
+import { getRenderSettings } from "@/lib/settings";
+import { getRenderSession } from "@/lib/auth";
+import { getProductDetails, listHeldOrders, posCatalog, getOpenShift } from "@/server/queries";
 import { PosClient } from "./PosClient";
 import { num } from "@/lib/format";
 import { normalizeShopMode } from "@/lib/theme";
 
 export default async function PosPage() {
-  const session = await getSession();
+  const [session, settings] = await Promise.all([getRenderSession(), getRenderSettings()]);
   if (!session) return null;
-  const settings = await getSettingsMap();
   const shopMode = normalizeShopMode(settings.shop_mode);
-  const { categories, products: listed } = await posCatalog(shopMode);
+  const [{ categories, products: listed }, held, shift] = await Promise.all([
+    posCatalog(shopMode),
+    listHeldOrders(session.id),
+    getOpenShift(session.id),
+  ]);
   // Match checkout: when negative stock is allowed, goods that merely ran out stay sellable.
   const allowNegative = settings.allow_negative_stock === "1";
   const products = listed.map((p) =>
@@ -18,12 +21,10 @@ export default async function PosPage() {
       ? { ...p, stockStatus: "available" as const }
       : p,
   );
-  const catalog: Record<string, Awaited<ReturnType<typeof getProductDetail>>> = {};
-  for (const p of products.filter((x) => x.kind === "recipe" || x.useVariants || x.useAddons)) {
-    catalog[p.id] = await getProductDetail(p.id);
-  }
-  const held = await listHeldOrders(session.id);
-  const shift = await getOpenShift(session.id);
+  const details = await getProductDetails(
+    products.filter((x) => x.kind === "recipe" || x.useVariants || x.useAddons).map((p) => p.id),
+  );
+  const catalog = Object.fromEntries(details);
   return (
     <PosClient
         shopMode={shopMode}
