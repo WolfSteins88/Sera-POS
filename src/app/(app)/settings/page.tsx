@@ -19,7 +19,7 @@ import { AccentColorPicker } from "@/components/AccentColorPicker";
 import { IdNumberInput } from "@/components/IdNumberInput";
 import { ImageField } from "@/components/ImageField";
 import { Card, Field, PageHeader, PrimaryButton, ghostButtonClass, inputClass } from "@/components/ui";
-import { getSettingsMap } from "@/lib/settings";
+import { getRenderSettings } from "@/lib/settings";
 import { defaultAccent, normalizeShopMode, parseAccentColor } from "@/lib/theme";
 import { DeleteDataButton } from "./DeleteDataButton";
 import { ImportBackupForm } from "./ImportBackupForm";
@@ -78,7 +78,7 @@ export default async function SettingsPage({
 }: {
   searchParams: Promise<{ saved?: string; imported?: string; purged?: string; purgeError?: string }>;
 }) {
-  const s = await getSettingsMap();
+  const s = await getRenderSettings();
   const params = await searchParams;
   const current = normalizeShopMode(s.shop_mode);
   const accent = parseAccentColor(s.ui_accent_color);

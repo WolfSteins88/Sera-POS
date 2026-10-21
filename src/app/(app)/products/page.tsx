@@ -8,7 +8,7 @@ import { ProductForm } from "./ProductForm";
 import { productHref, type ProductQuery } from "./productQuery";
 import { getDb } from "@/lib/db";
 import { addons } from "@/lib/schema";
-import { getSettingsMap } from "@/lib/settings";
+import { getRenderSettings } from "@/lib/settings";
 import { catalogPackFromQuery } from "@/lib/theme";
 import { getProductDetail, listCategories, listProducts } from "@/server/queries";
 
@@ -43,7 +43,7 @@ export default async function ProductsPage({
   searchParams: Promise<ProductQuery>;
 }) {
   const params = await searchParams;
-  const settings = await getSettingsMap();
+  const settings = await getRenderSettings();
   const pack = catalogPackFromQuery(params.pack, settings.shop_mode);
   const editingId = params.edit && params.edit !== "new" ? params.edit : "";
   const [catalog, categories, detail, editing] = await Promise.all([

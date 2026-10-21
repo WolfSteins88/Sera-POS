@@ -1,15 +1,16 @@
 import { redirect } from "next/navigation";
-import { getSession } from "@/lib/auth";
-import { getSetting } from "@/lib/settings";
+import { getRenderSession } from "@/lib/auth";
+import { getRenderSettings } from "@/lib/settings";
 import { AppShell } from "@/components/AppShell";
 import { normalizeShopMode } from "@/lib/theme";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const session = await getSession();
+  const session = await getRenderSession();
   if (!session) redirect("/login");
   if (session.mustChangePassword) redirect("/change-password");
-  const shopName = await getSetting("shop_name", "Toko");
-  const shopMode = normalizeShopMode(await getSetting("shop_mode", "fnb"));
+  const settings = await getRenderSettings();
+  const shopName = settings.shop_name ?? "Toko";
+  const shopMode = normalizeShopMode(settings.shop_mode ?? "fnb");
   return (
     <AppShell user={session} shopName={shopName} shopMode={shopMode}>
       {children}

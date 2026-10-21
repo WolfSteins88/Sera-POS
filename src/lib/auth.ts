@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import { eq } from "drizzle-orm";
@@ -34,6 +35,9 @@ export async function getSession(): Promise<SessionUser | null> {
     mustChangePassword: row.mustChangePassword,
   };
 }
+
+/** getSession for page renders: the layout and the page share one lookup per request. */
+export const getRenderSession = cache(getSession);
 
 export async function requireSession(): Promise<SessionUser> {
   const user = await getSession();

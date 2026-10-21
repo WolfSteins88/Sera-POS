@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -22,6 +21,7 @@ import {
 import { NAV_ITEMS, can, type Role } from "@/lib/rbac";
 import { logoutAction } from "@/app/actions/auth";
 import { Badge, PrimaryButton, ghostButtonClass } from "@/components/ui";
+import { NavLink } from "@/components/NavLink";
 
 const ICONS: Record<string, typeof LayoutDashboard> = {
   "/dashboard": LayoutDashboard,
@@ -151,7 +151,7 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
 
         <nav className="nav-pill justify-self-center" aria-label="Menu utama">
           {named.map((item) => (
-            <Link
+            <NavLink
               key={`pill-${item.href}`}
               href={item.href}
               className={`pressable inline-flex min-h-11 shrink-0 items-center rounded-full px-3 text-sm ${
@@ -159,7 +159,7 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
               }`}
             >
               {item.label}
-            </Link>
+            </NavLink>
           ))}
         </nav>
 
@@ -169,7 +169,7 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
               const Icon = ICONS[item.href] ?? Store;
               const active = isActive(item.href);
               return (
-                <Link
+                <NavLink
                   key={`icon-${item.href}`}
                   href={item.href}
                   aria-label={item.label}
@@ -179,7 +179,7 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
                   }`}
                 >
                   <Icon size={18} aria-hidden />
-                </Link>
+                </NavLink>
               );
             })}
           </nav>
@@ -235,7 +235,7 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
             const Icon = ICONS[item.href] ?? Store;
             const active = isActive(item.href);
             return (
-              <Link
+              <NavLink
                 key={`side-${item.href}`}
                 href={item.href}
                 onClick={closeNav}
@@ -245,7 +245,7 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
               >
                 <Icon size={20} aria-hidden />
                 {item.label}
-              </Link>
+              </NavLink>
             );
           })}
         </nav>
