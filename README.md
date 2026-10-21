@@ -1,6 +1,13 @@
 # Sera POS
 
-Sera POS adalah aplikasi kasir untuk **satu toko**: coffee shop (F&B) atau toko ritel. Aplikasi dijalankan di satu PC. Buka Chrome atau Edge ke `http://localhost:3000`. Penjualan tetap berjalan jika internet terputus.
+Sera POS adalah aplikasi kasir untuk **satu toko**: coffee shop (F&B) atau toko ritel.
+
+Dua cara memakai:
+
+- **Online:** versi live di <https://sera-pos.vercel.app> (Vercel + database Supabase).
+- **Lokal:** dijalankan di satu PC, buka Chrome atau Edge ke `http://localhost:3000`. Penjualan tetap berjalan jika internet terputus.
+
+Semua jam toko memakai **WITA** (Asia/Makassar): laporan, nomor struk, dan tampilan waktu.
 
 Mode toko: **F&B** atau **Retail**. Nilai lama `mixed` di database dibaca sebagai F&B.
 
@@ -13,7 +20,8 @@ Mode toko: **F&B** atau **Retail**. Nilai lama `mixed` di database dibaca sebaga
 | Data | PostgreSQL, Drizzle ORM, postgres.js |
 | Auth | Cookie sesi HMAC, password bcryptjs |
 | Validasi | Zod |
-| Foto | Unggahan ke disk lokal (opsional driver Supabase) |
+| Foto | Disk lokal (`IMAGE_DRIVER=local`) atau Supabase Storage (`IMAGE_DRIVER=supabase`, dipakai di versi live) |
+| Hosting | Vercel (Functions region `sin1`) + Supabase PostgreSQL lewat session pooler |
 | Migrasi | SQL di `supabase/migrations/` |
 
 Skrip setup: `npm run db:setup` (buat database, terapkan migrasi, seed akun dan data demo).
@@ -50,7 +58,7 @@ Skrip setup: `npm run db:setup` (buat database, terapkan migrasi, seed akun dan 
 
 - Riwayat penjualan.
 - Detail, cetak struk.
-- Batalkan transaksi: stok barang atau bahan kembali.
+- Batalkan transaksi (refund): stok barang atau bahan yang benar-benar terpakai kembali. Kasir hanya bisa membatalkan penjualannya sendiri selama shift masih terbuka; kas shift yang sudah ditutup tidak diubah. Setiap pembatalan tercatat di log aktivitas.
 
 ### Produk dan kategori
 
@@ -76,6 +84,7 @@ Skrip setup: `npm run db:setup` (buat database, terapkan migrasi, seed akun dan 
 ### Shift
 
 - Buka shift (modal awal), tutup shift (kas aktual, selisih, catatan).
+- Buka dan tutup shift dikunci terhadap ketukan ganda dan penjualan yang selesai di detik yang sama.
 - Format rupiah Indonesia: `500.000` = lima ratus ribu.
 - **Admin saja:** ubah modal awal dan kas tutup (selisih dihitung ulang), hapus shift kosong. Hapus ditolak jika masih ada transaksi.
 
@@ -87,22 +96,38 @@ Penjualan, Produk, Pajak & Biaya, Shift, dan Stok menampilkan 10 baris per halam
 
 ### Pengguna dan pengaturan
 
-- Pengguna: nama, username, email, peran, status, reset password.
+- Pengguna: nama, username, email, peran, status, reset password. Reset oleh admin memberi password sementara; pengguna wajib membuat password baru saat login berikutnya.
+- Produk atau pengguna yang punya riwayat penjualan tidak bisa dihapus (muncul pesan yang jelas). Kasir hanya bisa menghapus order tahanan miliknya sendiri.
 - Identitas toko: nama, logo, alamat, telepon, email, footer struk, mata uang.
 - Pajak %, service %, ukuran kertas struk, stok negatif. Persen memakai format angka Indonesia.
 - Mode toko F&B / retail (katalog kasir dan menu berubah, data tidak dihapus).
 - Warna aksen: Cokelat, Krem, Hijau, Biru, Ungu. Default F&B cokelat, retail biru.
-- Cadangan: unduh dump JSON tabel toko, atau unduh contoh demo F&B dan retail.
-- Impor JSON menimpa katalog, stok, shift, dan transaksi. Akun login tidak diubah. Impor minta centang konfirmasi.
+- Cadangan: unduh dump JSON tabel toko (`sera-pos-backup-<tanggal>.json`), atau unduh contoh demo F&B dan retail.
+- Impor JSON **menghapus dulu semua tabel toko** (katalog, stok, shift, transaksi), lalu mengisi dari berkas. Akun login tidak diubah. Impor minta centang konfirmasi dan menampilkan animasi loading selama berjalan.
 - Hapus data: pilih grup dengan centang, lalu hapus permanen. Kotak mulai kosong. Pengaturan toko, logo, dan mode tidak ikut. Grup: transaksi (pembayaran, pesanan ditahan, nomor struk), shift, produk (varian dan add-on), kategori, bahan baku (riwayat stok), resep, pengguna lain (akun yang sedang login tetap), printer.
 - Hapus ditolak, tanpa menghapus data lain, jika urutannya salah: produk butuh transaksi dan resep kosong dulu, kategori butuh produk kosong dulu, bahan baku butuh resep kosong dulu, shift butuh transaksi kosong dulu, pengguna lain butuh transaksi dan shift kosong dulu.
+
+### Data demo
+
+- Dua toko contoh: **Sera Coffee** (F&B, `seeds/fnb-demo.json`) dan **Sera Mart** (retail, `seeds/retail-demo.json`).
+- Isinya transaksi dan shift **1 sampai 20 Oktober 2026** dalam jam WITA (+08:00).
+- Cara memakai: Pengaturan → Cadangan, unduh contoh demo, lalu impor berkasnya. **Peringatan:** impor menghapus semua data toko yang ada (produk, stok, shift, transaksi) sebelum mengisi data demo. Unduh cadangan dulu jika datanya masih dipakai.
+- Berkas dibuat ulang dengan `npm run seed:fnb-json` dan `npm run seed:retail-json`. Database yang sudah jalan tidak berubah sampai berkas itu diimpor.
+
+### Kecepatan dan loading
+
+- Pindah halaman tanpa layar loading: halaman lama tetap tampil sampai halaman baru siap.
+- Menu memuat halaman tujuan lebih dulu saat kursor diarahkan, link difokuskan, atau disentuh (bukan saat link sekadar terlihat, agar koneksi database tidak habis).
+- Halaman yang baru dibuka disimpan di browser selama **30 detik**, jadi kembali ke halaman itu langsung tampil. Perubahan dari perangkat lain bisa terlambat terlihat sampai 30 detik; perubahan yang disimpan sendiri langsung tampil.
+- Animasi loading (empat kotak warna, sama dengan Sera PMS) hanya muncul saat data benar-benar dimuat: impor cadangan, dan ganti filter, tab, atau halaman di Laporan, Transaksi, dan Shift (data lama diredupkan, loader muncul setelah sekitar 0,2 detik). Tombol simpan, hapus, dan bayar memakai loader kecil di dalam tombol.
 
 ### Lainnya
 
 - Format angka dan uang Indonesia (titik ribuan, koma desimal).
 - Menu desktop pill + drawer hamburger. Keluar akun minta konfirmasi.
+- Sesi login berlaku 16 jam dan akun dicek ulang setiap permintaan (akun nonaktif langsung keluar).
+- Halaman login tidak menampilkan akun demo.
 - Satu toko, tanpa multi-cabang.
-- Contoh data demo dibuat ulang dengan `npm run seed:fnb-json` dan `npm run seed:retail-json` (berkas di `seeds/`). Database yang sudah jalan tidak berubah sampai berkas itu diimpor dari Pengaturan.
 
 ## Cara menjalankan
 
@@ -118,7 +143,7 @@ npm run dev
 
 4. Buka `http://localhost:3000`.
 
-Akun seed (password `password123`):
+Akun seed lokal (password `password123`, tidak ditampilkan di halaman login):
 
 | Username | Peran |
 | --- | --- |
@@ -126,7 +151,7 @@ Akun seed (password `password123`):
 | `manager` | Manajer |
 | `cashier` | Kasir |
 
-Variabel lingkungan ada di `.env.example`. Jangan commit `.env.local`.
+Variabel lingkungan ada di `.env.example`. Jangan commit `.env.local`. Di production, `SESSION_SECRET` bawaan ditolak, jadi wajib diganti.
 
 ## Deploy ke Vercel + Supabase
 
@@ -146,7 +171,9 @@ Variabel lingkungan ada di `.env.example`. Jangan commit `.env.local`.
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key (rahasia, jangan diberi awalan `NEXT_PUBLIC_`) |
 | `SUPABASE_IMAGE_BUCKET` | `pos-images` (opsional) |
 
-5. Atur region Functions di Vercel sama dengan region database Supabase agar query cepat. Zona waktu WITA sudah tertulis di query, jadi `TZ` tidak perlu diset.
+5. Atur region Functions di Vercel sama dengan region database Supabase agar query cepat (versi live: `sin1` + Supabase Singapura). Zona waktu WITA sudah tertulis di query, jadi `TZ` tidak perlu diset.
+
+Batas koneksi: session pooler Supabase hanya menerima **15 klien** sekaligus. Di Vercel setiap instance memakai paling banyak 2 koneksi dan menutup koneksi yang menganggur setelah sekitar 5 detik, supaya instance yang diam tidak menghabiskan slot (gejala jika habis: halaman error `max clients reached`). Di lokal batasnya 10 koneksi.
 
 ## Alur uji penjualan
 
