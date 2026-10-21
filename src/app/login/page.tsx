@@ -115,7 +115,6 @@ export default async function LoginPage({
               <FormPending />
             </button>
           </div>
-          <p className="mt-5 text-xs text-muted">admin / manager / cashier · password123</p>
         </form>
       </section>
     </div>
