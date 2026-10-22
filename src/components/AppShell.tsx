@@ -124,7 +124,7 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="app-header no-print sticky top-0 z-[110] grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/80 bg-white/60 px-3 shadow-[0_1px_0_rgb(31_36_48/0.06)] backdrop-blur-xl backdrop-saturate-150 lg:gap-3">
+      <header className="app-header no-print sticky top-2.5 z-[110] mx-2.5 mt-2.5 grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 rounded-full px-2 lg:mx-4 lg:gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <button
             id="menuToggleBtn"
@@ -189,12 +189,12 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
               aria-expanded={accountOpen}
               aria-haspopup="dialog"
               onClick={() => setAccountOpen((value) => !value)}
-              className="pressable flex min-w-0 items-center gap-2 rounded-full border border-line bg-white/80 py-1 pr-3 pl-1 text-left hover:bg-accent-soft"
+              className="pressable flex min-w-0 items-center gap-2 rounded-full border border-line bg-white/80 py-1 pr-1 pl-1 text-left hover:bg-accent-soft sm:pr-3"
             >
               <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-white">
                 {initial}
               </span>
-              <span className="min-w-0">
+              <span className="hidden min-w-0 sm:block">
                 <span className="block max-w-[6rem] truncate text-sm font-medium sm:max-w-[9rem]">{user.name}</span>
                 <span className="block text-xs text-muted">{ROLE_LABEL[user.role]}</span>
               </span>

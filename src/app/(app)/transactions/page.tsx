@@ -238,7 +238,7 @@ export default async function TransactionsPage({ searchParams }: { searchParams:
         </section>
 
         {detail ? (
-          <aside className={`${CARD} xl:sticky xl:top-4`}>
+          <aside className={`${CARD} xl:sticky xl:top-[5.5rem]`}>
             <div className="flex items-start justify-between gap-2">
               <div>
                 <h2 className="font-semibold">{detail.transaction_number}</h2>
