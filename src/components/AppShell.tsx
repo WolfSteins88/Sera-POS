@@ -219,7 +219,7 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
       />
 
       <aside id="appDrawer" className={`app-drawer no-print ${open ? "open" : ""}`} aria-hidden={!open}>
-        <div className="flex items-center justify-between gap-2 border-b border-white/15 px-4 py-3">
+        <div className="flex items-center justify-between gap-2 border-b border-white/10 py-3 pr-3 pl-5">
           <p className="truncate text-base font-semibold">{shopName}</p>
           <button
             type="button"
@@ -239,8 +239,8 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
                 key={`side-${item.href}`}
                 href={item.href}
                 onClick={closeNav}
-                className={`pressable flex min-h-12 items-center gap-3 rounded-2xl px-3.5 text-base ${
-                  active ? "bg-white/20 font-semibold text-white" : "text-[color:var(--sidebar-muted)] hover:bg-white/10"
+                className={`pressable flex min-h-12 items-center gap-3 rounded-full px-4 text-base ${
+                  active ? "bg-white/15 font-semibold text-white shadow-[inset_0_1px_0_rgb(255_255_255/0.12)]" : "text-[color:var(--sidebar-muted)] hover:bg-white/10"
                 }`}
               >
                 <Icon size={20} aria-hidden />
@@ -249,8 +249,8 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
             );
           })}
         </nav>
-        <div className="border-t border-white/15 p-3 pb-5">
-          <button type="button" className="btn w-full rounded-2xl border border-white/25 text-base text-white" onClick={askLogout}>
+        <div className="border-t border-white/10 p-3">
+          <button type="button" className="btn pressable w-full rounded-full border border-white/20 bg-white/5 text-base text-white hover:bg-white/10" onClick={askLogout}>
             Keluar
           </button>
         </div>

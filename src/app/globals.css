@@ -178,18 +178,26 @@ textarea {
   transition: opacity var(--motion-enter) var(--ease-out-curve);
 }
 
+/* Floating rounded panel with the same glows as the login hero. */
 .app-drawer {
   position: fixed;
-  top: 0;
-  left: 0;
-  bottom: 0;
+  top: 10px;
+  left: 10px;
+  bottom: 10px;
   z-index: 1300;
   display: flex;
-  width: min(20rem, 88vw);
+  width: min(20rem, calc(100vw - 3rem));
   flex-direction: column;
-  background: var(--sidebar);
+  overflow: hidden;
+  border-radius: 28px;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background:
+    radial-gradient(70% 40% at 100% 0%, rgb(27 106 165 / 0.45), transparent 70%),
+    radial-gradient(70% 35% at 0% 100%, rgb(169 83 47 / 0.35), transparent 70%),
+    var(--sidebar);
+  box-shadow: 0 2px 4px rgb(26 30 40 / 0.1), 0 40px 80px -30px rgb(30 45 80 / 0.5);
   color: var(--sidebar-fg);
-  transform: translateX(-100%);
+  transform: translateX(calc(-100% - 20px));
   pointer-events: none;
   visibility: hidden;
   transition:
