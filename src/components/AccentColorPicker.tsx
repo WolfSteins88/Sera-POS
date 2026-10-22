@@ -3,6 +3,8 @@
 import { useState } from "react";
 
 const PRESETS = [
+  { label: "Cokelat", hex: "#4a3525" },
+  { label: "Terakota", hex: "#a9532f" },
   { label: "Krem", hex: "#c4a574" },
   { label: "Hijau", hex: "#6f8f72" },
   { label: "Biru", hex: "#6e8b9a" },
@@ -23,7 +25,7 @@ export function AccentColorPicker({
   defaultColor: string;
 }) {
   const [selected, setSelected] = useState(() => initialSelection(value, defaultColor));
-  const defaultName = defaultColor.toLowerCase() === "#0ea5e9" ? "Biru" : "Cokelat";
+  const defaultName = defaultColor.toLowerCase() === "#1b6aa5" ? "Biru" : "Tinta";
   const extra = selected && !PRESETS.some((preset) => preset.hex === selected) ? selected : "";
 
   function apply(next: string) {

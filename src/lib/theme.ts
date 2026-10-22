@@ -5,7 +5,7 @@ export function normalizeShopMode(raw: string | null | undefined): ShopMode {
 }
 
 export function defaultAccent(mode: string) {
-  return normalizeShopMode(mode) === "retail" ? "#0ea5e9" : "#4a3525";
+  return normalizeShopMode(mode) === "retail" ? "#1b6aa5" : "#1f2430";
 }
 
 export function catalogPackFromQuery(raw: string | null | undefined, shopMode: string | null | undefined): ShopMode {

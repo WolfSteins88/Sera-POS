@@ -85,7 +85,7 @@ export function HourBars({ hours }: { hours: Hour[] }) {
                     {pad(hour.hour)} · {metric === "sales" ? money(value) : String(value)}
                   </text>
                 ) : null}
-                <rect x={x} y={y} width={barW} height={Math.max(value > 0 ? 3 : 0, h)} rx="4" fill={active ? "var(--accent)" : "color-mix(in srgb, var(--accent) 72%, #c4a484)"} />
+                <rect x={x} y={y} width={barW} height={Math.max(value > 0 ? 3 : 0, h)} rx="4" fill={active ? "var(--accent)" : "color-mix(in srgb, var(--accent) 55%, #dcebf6)"} />
                 <text x={x + barW / 2} y={height - 8} textAnchor="middle" className="fill-muted text-[9px]">
                   {plotted.length > 16 && index % 2 === 1 ? "" : pad(hour.hour)}
                 </text>
