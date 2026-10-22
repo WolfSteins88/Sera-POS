@@ -124,7 +124,7 @@ export function AppShell({ user, shopName, shopMode, children }: Props) {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="app-header no-print sticky top-0 z-[110] grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-line/60 bg-white/70 px-3 backdrop-blur-md lg:gap-3">
+      <header className="app-header no-print sticky top-0 z-[110] grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 border-b border-white/80 bg-white/60 px-3 shadow-[0_1px_0_rgb(31_36_48/0.06)] backdrop-blur-xl backdrop-saturate-150 lg:gap-3">
         <div className="flex min-w-0 items-center gap-2">
           <button
             id="menuToggleBtn"

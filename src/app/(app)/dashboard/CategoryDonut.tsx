@@ -14,10 +14,10 @@ const RANGES: { key: RangeKey; label: string }[] = [
 
 const COLORS = [
   "var(--accent)",
-  "color-mix(in srgb, var(--accent) 58%, #c4a484)",
-  "color-mix(in srgb, var(--accent) 42%, #6f8f72)",
-  "color-mix(in srgb, var(--accent) 24%, #d7c4b0)",
-  "#a8a29e",
+  "var(--cta)",
+  "#7db9e4",
+  "#2f6b4f",
+  "#c9cdd4",
 ];
 
 function compactCenter(value: number) {
