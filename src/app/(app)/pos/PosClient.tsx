@@ -495,7 +495,7 @@ export function PosClient({
         )}
       </div>
 
-      <aside className="rounded-2xl border border-line bg-surface p-4 shadow-card xl:sticky xl:top-4">
+      <aside className="rounded-2xl border border-line bg-surface p-4 shadow-card xl:sticky xl:top-[5.5rem]">
         <div className="flex items-center justify-between gap-2">
           <h2 className="font-semibold">Pesanan</h2>
           <button type="button" onClick={newOrder} className="text-sm text-accent">
